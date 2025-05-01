@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,32 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for our motorcycle repair shop
+				"shop-blue": {
+					50: "#f0f7ff",
+					100: "#e0eefe",
+					200: "#baddfd",
+					300: "#7cc2fb",
+					400: "#47a3f5",
+					500: "#2186e9",
+					600: "#1068c7",
+					700: "#1054a1",
+					800: "#104785",
+					900: "#133d6e",
+				},
+				"shop-orange": {
+					50: "#fff8ed",
+					100: "#ffefd4",
+					200: "#ffdaa8",
+					300: "#ffbe70",
+					400: "#ff9a37",
+					500: "#fa7707",
+					600: "#e85902",
+					700: "#c13d06",
+					800: "#9a310d",
+					900: "#7c2a0e",
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +110,16 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-subtle': 'pulse-subtle 2s infinite',
 			}
 		}
 	},
