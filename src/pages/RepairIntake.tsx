@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -33,9 +32,12 @@ import {
   AlertCircle, 
   XCircle, 
   HelpCircle,
-  Camera
+  Camera,
+  ClipboardCheck
 } from "lucide-react";
 import { Customer, Motorcycle, ChecklistStatus, ChecklistItem } from "@/types";
+import { CustomerChecklist } from "@/components/repair/CustomerChecklist";
+import { toast } from "sonner";
 
 export default function RepairIntake() {
   // Mock data - would come from an API in a real application
@@ -153,6 +155,11 @@ export default function RepairIntake() {
   
   // State for checklist items
   const [checklistData, setChecklistData] = useState<ChecklistItem[]>([]);
+  
+  // Customer confirmation states
+  const [showCustomerChecklist, setShowCustomerChecklist] = useState(false);
+  const [customerConfirmed, setCustomerConfirmed] = useState(false);
+  const [customerComments, setCustomerComments] = useState("");
 
   const filteredCustomers = mockCustomers.filter(
     (customer) =>
@@ -237,6 +244,23 @@ export default function RepairIntake() {
       case "not-checked":
       default:
         return "border-gray-200";
+    }
+  };
+
+  const handleCustomerConfirmation = (comments: string) => {
+    setCustomerComments(comments);
+    setCustomerConfirmed(true);
+    setShowCustomerChecklist(false);
+    toast.success("Customer has confirmed the pre-repair checklist");
+  };
+
+  const completeIntakeAndGenerateQuote = () => {
+    if (!customerConfirmed) {
+      setShowCustomerChecklist(true);
+    } else {
+      // Here you would handle the final submission logic
+      toast.success("Repair intake completed and quote generated!");
+      // Ideally redirect to the quote view or next step in the process
     }
   };
 
@@ -551,12 +575,29 @@ export default function RepairIntake() {
                   </div>
                 </div>
                 
+                {customerConfirmed && (
+                  <div className="p-4 border rounded-md bg-green-50 flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="font-medium text-green-700">Customer has confirmed the checklist</p>
+                      {customerComments && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Comments: {customerComments}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex justify-between space-x-2">
                   <Button variant="outline" onClick={() => setActiveTab("intake")}>
                     Back
                   </Button>
-                  <Button>
-                    Complete Intake & Generate Quote
+                  <Button onClick={completeIntakeAndGenerateQuote}>
+                    {customerConfirmed 
+                      ? "Complete Intake & Generate Quote" 
+                      : "Get Customer Confirmation & Complete"
+                    }
                   </Button>
                 </div>
               </div>
@@ -564,6 +605,13 @@ export default function RepairIntake() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Customer pre-repair checklist confirmation dialog */}
+      <CustomerChecklist
+        isOpen={showCustomerChecklist}
+        onClose={() => setShowCustomerChecklist(false)}
+        onConfirm={handleCustomerConfirmation}
+      />
     </div>
   );
 }
