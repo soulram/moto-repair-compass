@@ -19,6 +19,10 @@ export function CategoryProgress({ progress }: CategoryProgressProps) {
         <div 
           className={`${getProgressColor(progress)} h-2.5 rounded-full transition-all duration-500 ease-in-out`}
           style={{ width: `${progress}%` }}
+          role="progressbar" 
+          aria-valuenow={progress} 
+          aria-valuemin={0} 
+          aria-valuemax={100}
         ></div>
       </div>
       <span className="text-xs text-gray-500 min-w-[3rem] text-right">

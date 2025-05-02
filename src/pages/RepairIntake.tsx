@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -283,7 +282,7 @@ export default function RepairIntake() {
               <TabsTrigger value="customer">Customer</TabsTrigger>
               <TabsTrigger value="motorcycle" disabled={!selectedCustomer}>Motorcycle</TabsTrigger>
               <TabsTrigger value="intake" disabled={!selectedMotorcycle}>Intake Info</TabsTrigger>
-              <TabsTrigger value="checklist" disabled={!selectedMotorcycle || activeTab !== "checklist"}>Checklist</TabsTrigger>
+              <TabsTrigger value="checklist" disabled={!selectedMotorcycle || !mileage}>Checklist</TabsTrigger>
             </TabsList>
             
             <TabsContent value="customer">
