@@ -41,14 +41,46 @@ export function ChecklistCategory({
   onAddNotes,
   onCapturePhoto,
 }: ChecklistCategoryProps) {
+  // Count items by status
+  const getStatusCounts = () => {
+    const itemIds = items.map(item => item.id);
+    const categoryItems = checklistData.filter(item => itemIds.includes(item.id));
+    
+    return {
+      ok: categoryItems.filter(item => item.status === "ok").length,
+      monitor: categoryItems.filter(item => item.status === "monitor").length,
+      replace: categoryItems.filter(item => item.status === "replace").length,
+      notChecked: categoryItems.filter(item => item.status === "not-checked").length,
+    };
+  };
+  
+  const statusCounts = getStatusCounts();
+
   return (
-    <Accordion type="single" collapsible className="border rounded-md shadow-sm">
+    <Accordion type="single" collapsible className="border rounded-md shadow-sm mb-4">
       <AccordionItem value={name}>
         <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 group">
           <div className="flex items-center gap-3 flex-1">
             {icon}
             <span>{name}</span>
             <div className="ml-auto flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-1 mr-2">
+                {statusCounts.replace > 0 && (
+                  <span className="px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">
+                    {statusCounts.replace} Replace
+                  </span>
+                )}
+                {statusCounts.monitor > 0 && (
+                  <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                    {statusCounts.monitor} Monitor
+                  </span>
+                )}
+                {statusCounts.ok > 0 && (
+                  <span className="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
+                    {statusCounts.ok} OK
+                  </span>
+                )}
+              </div>
               <CategoryProgress progress={progress} />
             </div>
           </div>

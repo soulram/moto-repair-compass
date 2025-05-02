@@ -3,7 +3,7 @@ import React from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileText, Camera } from "lucide-react";
+import { FileText, Camera, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ChecklistStatus } from "@/types";
 
 interface ChecklistItemProps {
@@ -42,45 +42,14 @@ export function ChecklistItem({
   const getStatusIcon = (status: ChecklistStatus) => {
     switch (status) {
       case "ok":
-        return (
-          <div className="h-5 w-5 text-green-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-          </div>
-        );
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       case "monitor":
-        return (
-          <div className="h-5 w-5 text-yellow-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-        );
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case "replace":
-        return (
-          <div className="h-5 w-5 text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
-            </svg>
-          </div>
-        );
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       case "not-checked":
       default:
-        return (
-          <div className="h-5 w-5 text-gray-300">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-        );
+        return <AlertCircle className="h-5 w-5 text-gray-300" />;
     }
   };
 

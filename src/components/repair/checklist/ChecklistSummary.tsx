@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CheckCircle2, AlertCircle, ListChecks, ClipboardCheck } from "lucide-react";
+import { CheckCircle2, AlertCircle, ListChecks, ClipboardCheck, AlertTriangle } from "lucide-react";
 import { ChecklistItem } from "@/types";
 
 interface ChecklistSummaryProps {
@@ -16,7 +16,13 @@ export function ChecklistSummary({
   customerComments,
   totalProgress,
 }: ChecklistSummaryProps) {
-  const issuesFound = checklistData.filter(item => item.requiresAttention).length;
+  const issuesCount = {
+    replace: checklistData.filter(item => item.status === "replace").length,
+    monitor: checklistData.filter(item => item.status === "monitor").length
+  };
+  
+  const totalIssues = issuesCount.replace + issuesCount.monitor;
+  const checkedItemsCount = checklistData.filter(item => item.status !== "not-checked").length;
 
   return (
     <div className="space-y-6">
@@ -28,22 +34,27 @@ export function ChecklistSummary({
               <p className="font-medium">Inspection Summary</p>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              {checklistData.filter(item => item.status !== "not-checked").length} of {checklistData.length} items checked
+              {checkedItemsCount} of {checklistData.length} items checked ({totalProgress}% complete)
             </p>
           </div>
           <div className="text-right">
-            {issuesFound > 0 ? (
+            {totalIssues > 0 ? (
               <div className="bg-red-50 border border-red-100 rounded-md p-3">
-                <p className="text-red-600 font-medium flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5" />
-                  {issuesFound} {issuesFound === 1 ? 'issue' : 'issues'} found
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {checklistData.filter(item => item.status === "replace").length} {checklistData.filter(item => item.status === "replace").length === 1 ? 'item' : 'items'} need replacement
-                </p>
+                {issuesCount.replace > 0 && (
+                  <p className="text-red-600 font-medium flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5" />
+                    {issuesCount.replace} {issuesCount.replace === 1 ? 'item' : 'items'} need replacement
+                  </p>
+                )}
+                {issuesCount.monitor > 0 && (
+                  <p className="text-yellow-600 font-medium flex items-center gap-2 mt-1">
+                    <AlertTriangle className="h-5 w-5" />
+                    {issuesCount.monitor} {issuesCount.monitor === 1 ? 'item' : 'items'} need monitoring
+                  </p>
+                )}
               </div>
             ) : (
-              checklistData.filter(item => item.status !== "not-checked").length > 0 && (
+              checkedItemsCount > 0 && (
                 <div className="bg-green-50 border border-green-100 rounded-md p-3">
                   <p className="text-green-600 font-medium flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />

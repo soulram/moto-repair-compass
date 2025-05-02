@@ -6,11 +6,18 @@ interface CategoryProgressProps {
 }
 
 export function CategoryProgress({ progress }: CategoryProgressProps) {
+  // Function to determine color based on progress
+  const getProgressColor = (percentage: number) => {
+    if (percentage < 30) return "bg-red-500";
+    if (percentage < 70) return "bg-yellow-500";
+    return "bg-green-500";
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <div className="w-24 bg-gray-200 rounded-full h-2 ml-2">
+      <div className="w-24 bg-gray-200 rounded-full h-2.5 ml-2">
         <div 
-          className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+          className={`${getProgressColor(progress)} h-2.5 rounded-full transition-all duration-500 ease-in-out`}
           style={{ width: `${progress}%` }}
         ></div>
       </div>
