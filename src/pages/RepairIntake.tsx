@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -33,7 +35,10 @@ import {
   XCircle, 
   HelpCircle,
   Camera,
-  ClipboardCheck
+  ClipboardCheck,
+  FileText,
+  ListChecks,
+  CheckSquare
 } from "lucide-react";
 import { Customer, Motorcycle, ChecklistStatus, ChecklistItem } from "@/types";
 import { CustomerChecklist } from "@/components/repair/CustomerChecklist";
@@ -106,6 +111,7 @@ export default function RepairIntake() {
   const checklistCategories = [
     {
       name: "Engine & Transmission",
+      icon: <CheckSquare className="h-5 w-5 text-blue-500" />,
       items: [
         { id: "e1", name: "Engine oil level", category: "engine" },
         { id: "e2", name: "Engine oil condition", category: "engine" },
@@ -116,6 +122,7 @@ export default function RepairIntake() {
     },
     {
       name: "Brakes & Suspension",
+      icon: <CheckSquare className="h-5 w-5 text-red-500" />,
       items: [
         { id: "b1", name: "Front brake pads", category: "brakes" },
         { id: "b2", name: "Rear brake pads", category: "brakes" },
@@ -126,6 +133,7 @@ export default function RepairIntake() {
     },
     {
       name: "Electrical & Lighting",
+      icon: <CheckSquare className="h-5 w-5 text-yellow-500" />,
       items: [
         { id: "l1", name: "Headlight operation", category: "electrical" },
         { id: "l2", name: "Tail light operation", category: "electrical" },
@@ -136,6 +144,7 @@ export default function RepairIntake() {
     },
     {
       name: "Tires & Wheels",
+      icon: <CheckSquare className="h-5 w-5 text-green-500" />,
       items: [
         { id: "t1", name: "Front tire tread", category: "tires" },
         { id: "t2", name: "Rear tire tread", category: "tires" },
@@ -265,6 +274,47 @@ export default function RepairIntake() {
   };
 
   const issuesFound = checklistData.filter(item => item.requiresAttention).length;
+
+  const getCategoryProgressPercentage = (categoryName: string) => {
+    const categoryItems = checklistCategories
+      .find(cat => cat.name === categoryName)?.items || [];
+    
+    if (categoryItems.length === 0) return 0;
+    
+    const checkedItems = checklistData.filter(
+      item => categoryItems.some(catItem => catItem.id === item.id) && 
+      item.status !== "not-checked"
+    ).length;
+    
+    return Math.round((checkedItems / categoryItems.length) * 100);
+  };
+
+  const getTotalProgress = () => {
+    if (checklistData.length === 0) return 0;
+    const checkedItems = checklistData.filter(item => item.status !== "not-checked").length;
+    return Math.round((checkedItems / checklistData.length) * 100);
+  };
+
+  // Function to handle adding notes for a checklist item
+  const handleAddNotes = (itemId: string, currentStatus: ChecklistStatus) => {
+    // Find the current item to show existing notes if any
+    const currentItem = checklistData.find(item => item.id === itemId);
+    const currentNotes = currentItem?.notes || "";
+    
+    // Get new notes from user
+    const notes = prompt("Add notes about this item:", currentNotes);
+    
+    if (notes !== null) {
+      handleChecklistItemChange(itemId, currentStatus, notes);
+    }
+  };
+
+  // Function to capture mock photo (would be replaced with camera functionality)
+  const handleCapturePhoto = (itemId: string) => {
+    toast.info("Camera functionality would open here", {
+      description: "In a real app, this would open the device camera."
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -475,13 +525,44 @@ export default function RepairIntake() {
             
             <TabsContent value="checklist">
               <div className="space-y-6">
+                {/* Total progress indicator */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <ListChecks className="h-5 w-5 text-blue-500" />
+                      <h3 className="font-medium">Inspection Progress</h3>
+                    </div>
+                    <span className="text-sm font-medium">{getTotalProgress()}% Complete</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+                      style={{ width: `${getTotalProgress()}%` }}
+                    ></div>
+                  </div>
+                </div>
+
                 {checklistCategories.map((category) => (
-                  <Accordion key={category.name} type="single" collapsible className="border rounded-md">
+                  <Accordion key={category.name} type="single" collapsible className="border rounded-md shadow-sm">
                     <AccordionItem value={category.name}>
-                      <AccordionTrigger className="px-4 py-2 hover:bg-gray-50">
-                        {category.name}
+                      <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 group">
+                        <div className="flex items-center gap-3 flex-1">
+                          {category.icon}
+                          <span>{category.name}</span>
+                          <div className="ml-auto flex items-center gap-2">
+                            <div className="w-24 bg-gray-200 rounded-full h-2 ml-2">
+                              <div 
+                                className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+                                style={{ width: `${getCategoryProgressPercentage(category.name)}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500 min-w-[3rem] text-right">
+                              {getCategoryProgressPercentage(category.name)}%
+                            </span>
+                          </div>
+                        </div>
                       </AccordionTrigger>
-                      <AccordionContent className="px-0">
+                      <AccordionContent className="px-0 py-1">
                         <div className="divide-y">
                           {category.items.map((item) => {
                             const checklistItem = checklistData.find((i) => i.id === item.id);
@@ -490,58 +571,82 @@ export default function RepairIntake() {
                             return (
                               <div 
                                 key={item.id} 
-                                className={`checklist-item transition-colors ${getStatusClass(status)}`}
+                                className={`p-4 flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0 transition-colors ${getStatusClass(status)}`}
                               >
-                                <div className="flex-1">
-                                  <div className="font-medium">{item.name}</div>
-                                  {checklistItem?.notes && (
-                                    <div className="text-sm text-muted-foreground mt-1">
-                                      Note: {checklistItem.notes}
-                                    </div>
-                                  )}
+                                <div className="flex items-start gap-3">
+                                  {getStatusIcon(status)}
+                                  <div>
+                                    <div className="font-medium">{item.name}</div>
+                                    {checklistItem?.notes && (
+                                      <div className="text-sm text-muted-foreground mt-1 bg-white bg-opacity-50 p-2 rounded border border-gray-100">
+                                        {checklistItem.notes}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
-                                  <Button 
-                                    variant={status === "ok" ? "default" : "outline"} 
-                                    size="sm"
-                                    className={status === "ok" ? "bg-green-500 hover:bg-green-600" : ""}
-                                    onClick={() => handleChecklistItemChange(item.id, "ok")}
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <RadioGroup 
+                                    value={status} 
+                                    onValueChange={(value) => handleChecklistItemChange(
+                                      item.id, 
+                                      value as ChecklistStatus, 
+                                      checklistItem?.notes || ""
+                                    )}
+                                    className="flex items-center space-x-2"
                                   >
-                                    OK
-                                  </Button>
+                                    <div className="flex items-center space-x-1">
+                                      <RadioGroupItem value="ok" id={`${item.id}-ok`} />
+                                      <Label 
+                                        htmlFor={`${item.id}-ok`}
+                                        className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-md cursor-pointer"
+                                      >
+                                        OK
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-1">
+                                      <RadioGroupItem value="monitor" id={`${item.id}-monitor`} />
+                                      <Label 
+                                        htmlFor={`${item.id}-monitor`}
+                                        className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer"
+                                      >
+                                        Monitor
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-1">
+                                      <RadioGroupItem value="replace" id={`${item.id}-replace`} />
+                                      <Label 
+                                        htmlFor={`${item.id}-replace`}
+                                        className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-md cursor-pointer"
+                                      >
+                                        Replace
+                                      </Label>
+                                    </div>
+                                  </RadioGroup>
                                   
-                                  <Button 
-                                    variant={status === "monitor" ? "default" : "outline"} 
-                                    size="sm"
-                                    className={status === "monitor" ? "bg-yellow-500 hover:bg-yellow-600" : ""}
-                                    onClick={() => {
-                                      const notes = prompt("Add notes about this item:");
-                                      if (notes !== null) {
-                                        handleChecklistItemChange(item.id, "monitor", notes);
-                                      }
-                                    }}
-                                  >
-                                    Monitor
-                                  </Button>
-                                  
-                                  <Button 
-                                    variant={status === "replace" ? "default" : "outline"} 
-                                    size="sm"
-                                    className={status === "replace" ? "bg-red-500 hover:bg-red-600" : ""}
-                                    onClick={() => {
-                                      const notes = prompt("Add notes about this item:");
-                                      if (notes !== null) {
-                                        handleChecklistItemChange(item.id, "replace", notes);
-                                      }
-                                    }}
-                                  >
-                                    Replace
-                                  </Button>
-                                  
-                                  <Button variant="ghost" size="sm">
-                                    <Camera className="h-4 w-4" />
-                                  </Button>
+                                  <div className="flex items-center space-x-2 ml-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => handleAddNotes(item.id, status)}
+                                    >
+                                      <FileText className="h-4 w-4" />
+                                      <span className="sr-only">Add notes</span>
+                                    </Button>
+                                    
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => handleCapturePhoto(item.id)}
+                                    >
+                                      <Camera className="h-4 w-4" />
+                                      <span className="sr-only">Take photo</span>
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -553,23 +658,36 @@ export default function RepairIntake() {
                 ))}
                 
                 <div className="p-4 border rounded-md bg-gray-50">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div>
-                      <p className="font-medium">Inspection Summary</p>
-                      <p className="text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <ListChecks className="h-5 w-5 text-blue-500" />
+                        <p className="font-medium">Inspection Summary</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
                         {checklistData.filter(item => item.status !== "not-checked").length} of {checklistData.length} items checked
                       </p>
                     </div>
                     <div className="text-right">
                       {issuesFound > 0 ? (
-                        <div>
-                          <p className="text-red-500 font-medium">{issuesFound} issues found</p>
-                          <p className="text-sm text-muted-foreground">
-                            {checklistData.filter(item => item.status === "replace").length} items need replacement
+                        <div className="bg-red-50 border border-red-100 rounded-md p-3">
+                          <p className="text-red-600 font-medium flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5" />
+                            {issuesFound} {issuesFound === 1 ? 'issue' : 'issues'} found
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {checklistData.filter(item => item.status === "replace").length} {checklistData.filter(item => item.status === "replace").length === 1 ? 'item' : 'items'} need replacement
                           </p>
                         </div>
                       ) : (
-                        <p className="text-green-500 font-medium">No issues found</p>
+                        checklistData.filter(item => item.status !== "not-checked").length > 0 && (
+                          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+                            <p className="text-green-600 font-medium flex items-center gap-2">
+                              <CheckCircle2 className="h-5 w-5" />
+                              No issues found
+                            </p>
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -589,16 +707,24 @@ export default function RepairIntake() {
                   </div>
                 )}
                 
-                <div className="flex justify-between space-x-2">
-                  <Button variant="outline" onClick={() => setActiveTab("intake")}>
-                    Back
-                  </Button>
-                  <Button onClick={completeIntakeAndGenerateQuote}>
-                    {customerConfirmed 
-                      ? "Complete Intake & Generate Quote" 
-                      : "Get Customer Confirmation & Complete"
-                    }
-                  </Button>
+                <div className="flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
+                  <div className="order-2 sm:order-1">
+                    <Button variant="outline" onClick={() => setActiveTab("intake")}>
+                      Back to Intake Information
+                    </Button>
+                  </div>
+                  <div className="order-1 sm:order-2">
+                    <Button 
+                      onClick={completeIntakeAndGenerateQuote}
+                      className={`w-full sm:w-auto ${getTotalProgress() < 100 ? 'bg-blue-500' : 'bg-green-500'}`}
+                      disabled={getTotalProgress() === 0}
+                    >
+                      {customerConfirmed 
+                        ? "Complete Intake & Generate Quote" 
+                        : "Get Customer Confirmation & Complete"
+                      }
+                    </Button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
