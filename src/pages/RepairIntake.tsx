@@ -1,48 +1,21 @@
+
 import { useState } from "react";
 import { 
   Card, 
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle 
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { 
-  Search, 
-  Plus, 
-  CheckCircle2, 
-  AlertCircle, 
-  XCircle, 
-  HelpCircle,
-  Camera,
-  ClipboardCheck,
-  FileText,
-  ListChecks,
-  CheckSquare
-} from "lucide-react";
 import { Customer, Motorcycle, ChecklistStatus, ChecklistItem } from "@/types";
 import { CustomerChecklist } from "@/components/repair/CustomerChecklist";
+import { CustomerSelectionTab } from "@/components/repair/CustomerSelectionTab";
+import { MotorcycleSelectionTab } from "@/components/repair/MotorcycleSelectionTab";
+import { IntakeInfoTab } from "@/components/repair/IntakeInfoTab";
+import { ChecklistTab } from "@/components/repair/ChecklistTab";
 import { toast } from "sonner";
+import { CheckSquare } from "lucide-react";
 
 export default function RepairIntake() {
   // Mock data - would come from an API in a real application
@@ -228,34 +201,6 @@ export default function RepairIntake() {
     );
   };
 
-  const getStatusIcon = (status: ChecklistStatus) => {
-    switch (status) {
-      case "ok":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "monitor":
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-      case "replace":
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      case "not-checked":
-      default:
-        return <HelpCircle className="h-5 w-5 text-gray-300" />;
-    }
-  };
-
-  const getStatusClass = (status: ChecklistStatus) => {
-    switch (status) {
-      case "ok":
-        return "border-green-200 bg-green-50";
-      case "monitor":
-        return "border-yellow-200 bg-yellow-50";
-      case "replace":
-        return "border-red-200 bg-red-50";
-      case "not-checked":
-      default:
-        return "border-gray-200";
-    }
-  };
-
   const handleCustomerConfirmation = (comments: string) => {
     setCustomerComments(comments);
     setCustomerConfirmed(true);
@@ -272,8 +217,6 @@ export default function RepairIntake() {
       // Ideally redirect to the quote view or next step in the process
     }
   };
-
-  const issuesFound = checklistData.filter(item => item.requiresAttention).length;
 
   const getCategoryProgressPercentage = (categoryName: string) => {
     const categoryItems = checklistCategories
@@ -344,389 +287,51 @@ export default function RepairIntake() {
             </TabsList>
             
             <TabsContent value="customer">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="customerSearch">Search Customer</Label>
-                  <div className="relative mt-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                    <Input
-                      id="customerSearch"
-                      placeholder="Search by name, email or phone..."
-                      className="pl-9"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                {searchQuery && (
-                  <div className="border rounded-md max-h-60 overflow-y-auto">
-                    {filteredCustomers.length > 0 ? (
-                      filteredCustomers.map((customer) => (
-                        <div
-                          key={customer.id}
-                          className="p-3 border-b flex items-center justify-between cursor-pointer hover:bg-gray-50"
-                          onClick={() => handleCustomerSelect(customer)}
-                        >
-                          <div>
-                            <p className="font-medium">{customer.firstName} {customer.lastName}</p>
-                            <p className="text-sm text-muted-foreground">{customer.email}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-muted-foreground">{customer.contractType}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center">
-                        <p>No customers found</p>
-                        <Button className="mt-2" variant="outline">
-                          <Plus className="mr-2 h-4 w-4" /> Add New Customer
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {selectedCustomer && (
-                  <div className="mt-4 p-4 border rounded-md bg-blue-50">
-                    <p className="font-medium">Selected Customer:</p>
-                    <p>{selectedCustomer.firstName} {selectedCustomer.lastName}</p>
-                    <p className="text-sm">{selectedCustomer.email} | {selectedCustomer.phone}</p>
-                  </div>
-                )}
-                
-                <div className="flex justify-end space-x-2 mt-6">
-                  <Button disabled={!selectedCustomer} onClick={() => setActiveTab("motorcycle")}>
-                    Next: Select Motorcycle
-                  </Button>
-                </div>
-              </div>
+              <CustomerSelectionTab 
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filteredCustomers={filteredCustomers}
+                selectedCustomer={selectedCustomer}
+                handleCustomerSelect={handleCustomerSelect}
+                onNext={() => setActiveTab("motorcycle")}
+              />
             </TabsContent>
             
             <TabsContent value="motorcycle">
-              <div className="space-y-4">
-                {selectedCustomer?.motorcycles.length === 0 ? (
-                  <div className="text-center p-8">
-                    <p className="mb-4">No motorcycles found for this customer</p>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" /> Add New Motorcycle
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <Label>Select a Motorcycle</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                      {selectedCustomer?.motorcycles.map((motorcycle) => (
-                        <div
-                          key={motorcycle.id}
-                          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                            selectedMotorcycle?.id === motorcycle.id
-                              ? "border-shop-blue-500 bg-shop-blue-50"
-                              : "hover:bg-gray-50"
-                          }`}
-                          onClick={() => handleMotorcycleSelect(motorcycle)}
-                        >
-                          <h3 className="font-medium text-lg">
-                            {motorcycle.year} {motorcycle.make} {motorcycle.model}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            License: {motorcycle.licensePlate}
-                          </p>
-                          <div className="mt-2 grid grid-cols-2 gap-1 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">VIN: </span>
-                              {motorcycle.vinNumber}
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Color: </span>
-                              {motorcycle.color}
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Current Mileage: </span>
-                              {motorcycle.currentMileage}
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Last Service: </span>
-                              {new Date(motorcycle.lastServiceDate).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex justify-between space-x-2 mt-6">
-                  <Button variant="outline" onClick={() => setActiveTab("customer")}>
-                    Back
-                  </Button>
-                  <Button disabled={!selectedMotorcycle} onClick={() => setActiveTab("intake")}>
-                    Next: Intake Information
-                  </Button>
-                </div>
-              </div>
+              <MotorcycleSelectionTab 
+                selectedCustomer={selectedCustomer}
+                selectedMotorcycle={selectedMotorcycle}
+                handleMotorcycleSelect={handleMotorcycleSelect}
+                onBack={() => setActiveTab("customer")}
+                onNext={() => setActiveTab("intake")}
+              />
             </TabsContent>
             
             <TabsContent value="intake">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentMileage">Current Mileage</Label>
-                    <Input
-                      id="currentMileage"
-                      type="number"
-                      placeholder="Enter current mileage"
-                      value={mileage}
-                      onChange={(e) => setMileage(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="repairType">Repair Type</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select repair type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="regular">Regular Maintenance</SelectItem>
-                        <SelectItem value="repair">Repair Service</SelectItem>
-                        <SelectItem value="diagnostic">Diagnostic</SelectItem>
-                        <SelectItem value="warranty">Warranty Work</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="customerNotes">Customer Reported Issues</Label>
-                  <Textarea
-                    id="customerNotes"
-                    placeholder="Enter any issues reported by the customer"
-                    value={customerNotes}
-                    onChange={(e) => setCustomerNotes(e.target.value)}
-                    className="min-h-[120px]"
-                  />
-                </div>
-                
-                <div className="flex justify-between space-x-2 mt-6">
-                  <Button variant="outline" onClick={() => setActiveTab("motorcycle")}>
-                    Back
-                  </Button>
-                  <Button
-                    onClick={initializeChecklist}
-                    disabled={!mileage}
-                  >
-                    Next: Start Inspection
-                  </Button>
-                </div>
-              </div>
+              <IntakeInfoTab 
+                mileage={mileage}
+                setMileage={setMileage}
+                customerNotes={customerNotes}
+                setCustomerNotes={setCustomerNotes}
+                onBack={() => setActiveTab("motorcycle")}
+                onNext={initializeChecklist}
+              />
             </TabsContent>
             
             <TabsContent value="checklist">
-              <div className="space-y-6">
-                {/* Total progress indicator */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <ListChecks className="h-5 w-5 text-blue-500" />
-                      <h3 className="font-medium">Inspection Progress</h3>
-                    </div>
-                    <span className="text-sm font-medium">{getTotalProgress()}% Complete</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
-                      style={{ width: `${getTotalProgress()}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {checklistCategories.map((category) => (
-                  <Accordion key={category.name} type="single" collapsible className="border rounded-md shadow-sm">
-                    <AccordionItem value={category.name}>
-                      <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 group">
-                        <div className="flex items-center gap-3 flex-1">
-                          {category.icon}
-                          <span>{category.name}</span>
-                          <div className="ml-auto flex items-center gap-2">
-                            <div className="w-24 bg-gray-200 rounded-full h-2 ml-2">
-                              <div 
-                                className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
-                                style={{ width: `${getCategoryProgressPercentage(category.name)}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-gray-500 min-w-[3rem] text-right">
-                              {getCategoryProgressPercentage(category.name)}%
-                            </span>
-                          </div>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-0 py-1">
-                        <div className="divide-y">
-                          {category.items.map((item) => {
-                            const checklistItem = checklistData.find((i) => i.id === item.id);
-                            const status = checklistItem?.status || "not-checked";
-                            
-                            return (
-                              <div 
-                                key={item.id} 
-                                className={`p-4 flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0 transition-colors ${getStatusClass(status)}`}
-                              >
-                                <div className="flex items-start gap-3">
-                                  {getStatusIcon(status)}
-                                  <div>
-                                    <div className="font-medium">{item.name}</div>
-                                    {checklistItem?.notes && (
-                                      <div className="text-sm text-muted-foreground mt-1 bg-white bg-opacity-50 p-2 rounded border border-gray-100">
-                                        {checklistItem.notes}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <RadioGroup 
-                                    value={status} 
-                                    onValueChange={(value) => handleChecklistItemChange(
-                                      item.id, 
-                                      value as ChecklistStatus, 
-                                      checklistItem?.notes || ""
-                                    )}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    <div className="flex items-center space-x-1">
-                                      <RadioGroupItem value="ok" id={`${item.id}-ok`} />
-                                      <Label 
-                                        htmlFor={`${item.id}-ok`}
-                                        className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-md cursor-pointer"
-                                      >
-                                        OK
-                                      </Label>
-                                    </div>
-                                    
-                                    <div className="flex items-center space-x-1">
-                                      <RadioGroupItem value="monitor" id={`${item.id}-monitor`} />
-                                      <Label 
-                                        htmlFor={`${item.id}-monitor`}
-                                        className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer"
-                                      >
-                                        Monitor
-                                      </Label>
-                                    </div>
-                                    
-                                    <div className="flex items-center space-x-1">
-                                      <RadioGroupItem value="replace" id={`${item.id}-replace`} />
-                                      <Label 
-                                        htmlFor={`${item.id}-replace`}
-                                        className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-md cursor-pointer"
-                                      >
-                                        Replace
-                                      </Label>
-                                    </div>
-                                  </RadioGroup>
-                                  
-                                  <div className="flex items-center space-x-2 ml-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="h-8 w-8 p-0"
-                                      onClick={() => handleAddNotes(item.id, status)}
-                                    >
-                                      <FileText className="h-4 w-4" />
-                                      <span className="sr-only">Add notes</span>
-                                    </Button>
-                                    
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      className="h-8 w-8 p-0"
-                                      onClick={() => handleCapturePhoto(item.id)}
-                                    >
-                                      <Camera className="h-4 w-4" />
-                                      <span className="sr-only">Take photo</span>
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                ))}
-                
-                <div className="p-4 border rounded-md bg-gray-50">
-                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <ListChecks className="h-5 w-5 text-blue-500" />
-                        <p className="font-medium">Inspection Summary</p>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {checklistData.filter(item => item.status !== "not-checked").length} of {checklistData.length} items checked
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {issuesFound > 0 ? (
-                        <div className="bg-red-50 border border-red-100 rounded-md p-3">
-                          <p className="text-red-600 font-medium flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5" />
-                            {issuesFound} {issuesFound === 1 ? 'issue' : 'issues'} found
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {checklistData.filter(item => item.status === "replace").length} {checklistData.filter(item => item.status === "replace").length === 1 ? 'item' : 'items'} need replacement
-                          </p>
-                        </div>
-                      ) : (
-                        checklistData.filter(item => item.status !== "not-checked").length > 0 && (
-                          <div className="bg-green-50 border border-green-100 rounded-md p-3">
-                            <p className="text-green-600 font-medium flex items-center gap-2">
-                              <CheckCircle2 className="h-5 w-5" />
-                              No issues found
-                            </p>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {customerConfirmed && (
-                  <div className="p-4 border rounded-md bg-green-50 flex items-center gap-2">
-                    <ClipboardCheck className="h-5 w-5 text-green-500" />
-                    <div>
-                      <p className="font-medium text-green-700">Customer has confirmed the checklist</p>
-                      {customerComments && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Comments: {customerComments}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex flex-col sm:flex-row justify-between gap-4 sm:items-center">
-                  <div className="order-2 sm:order-1">
-                    <Button variant="outline" onClick={() => setActiveTab("intake")}>
-                      Back to Intake Information
-                    </Button>
-                  </div>
-                  <div className="order-1 sm:order-2">
-                    <Button 
-                      onClick={completeIntakeAndGenerateQuote}
-                      className={`w-full sm:w-auto ${getTotalProgress() < 100 ? 'bg-blue-500' : 'bg-green-500'}`}
-                      disabled={getTotalProgress() === 0}
-                    >
-                      {customerConfirmed 
-                        ? "Complete Intake & Generate Quote" 
-                        : "Get Customer Confirmation & Complete"
-                      }
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <ChecklistTab 
+                checklistCategories={checklistCategories}
+                checklistData={checklistData}
+                onStatusChange={handleChecklistItemChange}
+                onBack={() => setActiveTab("intake")}
+                getTotalProgress={getTotalProgress}
+                getCategoryProgressPercentage={getCategoryProgressPercentage}
+                customerConfirmed={customerConfirmed}
+                customerComments={customerComments}
+                handleAddNotes={handleAddNotes}
+                handleCapturePhoto={handleCapturePhoto}
+                completeIntakeAndGenerateQuote={completeIntakeAndGenerateQuote}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
