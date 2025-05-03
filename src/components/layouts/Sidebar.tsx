@@ -20,7 +20,8 @@ import {
   Package, 
   FileText, 
   Settings, 
-  Wrench 
+  Wrench,
+  FileCheck
 } from "lucide-react";
 
 export function Sidebar() {
@@ -87,6 +88,15 @@ export function Sidebar() {
                   <Link to="/invoices" className="flex items-center gap-3">
                     <FileText size={18} />
                     <span>Invoices</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/contract-types" className="flex items-center gap-3">
+                    <FileCheck size={18} />
+                    <span>Contract Types</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

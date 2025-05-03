@@ -32,10 +32,30 @@ import {
   FileText, 
   Clipboard, 
   User, 
-  Calendar
+  Calendar, 
+  X
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
 
 import { Customer, ContractType } from "@/types";
+import { CustomerForm } from "@/components/customers/CustomerForm";
 
 export default function Customers() {
   // Mock data - would come from an API in a real application
@@ -158,8 +178,11 @@ export default function Customers() {
     }
   ];
 
-  const [customers] = useState<Customer[]>(mockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAddCustomerDialog, setShowAddCustomerDialog] = useState(false);
+  const [showEditCustomerDialog, setShowEditCustomerDialog] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const filteredCustomers = customers.filter(
     (customer) =>
@@ -182,6 +205,45 @@ export default function Customers() {
     }
   };
 
+  const handleAddCustomer = (data: Partial<Customer>) => {
+    // In a real app, this would call an API to create a customer
+    const newCustomer: Customer = {
+      id: `${customers.length + 1}`,
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      address: data.address || "",
+      contractType: data.contractType || "none",
+      motorcycles: data.motorcycles || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    setCustomers([...customers, newCustomer]);
+    setShowAddCustomerDialog(false);
+  };
+
+  const handleEditCustomer = (data: Partial<Customer>) => {
+    // In a real app, this would call an API to update a customer
+    if (selectedCustomer) {
+      const updatedCustomers = customers.map(customer => 
+        customer.id === selectedCustomer.id ? 
+          { ...customer, ...data, updatedAt: new Date().toISOString() } : 
+          customer
+      );
+      
+      setCustomers(updatedCustomers);
+      setShowEditCustomerDialog(false);
+      setSelectedCustomer(null);
+    }
+  };
+
+  const handleRowClick = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setShowEditCustomerDialog(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -191,7 +253,7 @@ export default function Customers() {
             Manage your customer information and service history
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setShowAddCustomerDialog(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add Customer
         </Button>
       </div>
@@ -240,13 +302,18 @@ export default function Customers() {
                 <TableHead>Contact</TableHead>
                 <TableHead>Contract</TableHead>
                 <TableHead>Motorcycles</TableHead>
+                <TableHead>Frame Number</TableHead>
                 <TableHead>Last Service</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCustomers.map((customer) => (
-                <TableRow key={customer.id}>
+                <TableRow 
+                  key={customer.id} 
+                  className="cursor-pointer"
+                  onClick={() => handleRowClick(customer)}
+                >
                   <TableCell className="font-medium">
                     {customer.firstName} {customer.lastName}
                   </TableCell>
@@ -267,6 +334,13 @@ export default function Customers() {
                     ))}
                   </TableCell>
                   <TableCell>
+                    {customer.motorcycles.map((moto) => (
+                      <div key={moto.id} className="text-sm">
+                        {moto.vinNumber}
+                      </div>
+                    ))}
+                  </TableCell>
+                  <TableCell>
                     {customer.motorcycles[0]?.lastServiceDate ? (
                       <div className="text-sm">
                         {new Date(customer.motorcycles[0].lastServiceDate).toLocaleDateString()}
@@ -277,22 +351,25 @@ export default function Customers() {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="sm">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(customer);
+                        }}>
                           <User className="mr-2 h-4 w-4" /> View Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <Clipboard className="mr-2 h-4 w-4" /> New Repair
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <FileText className="mr-2 h-4 w-4" /> View Invoices
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <Calendar className="mr-2 h-4 w-4" /> Schedule Service
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -317,6 +394,46 @@ export default function Customers() {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Add Customer Dialog */}
+      <Dialog open={showAddCustomerDialog} onOpenChange={setShowAddCustomerDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogDescription>
+              Enter customer details to add them to your database.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <CustomerForm 
+            onSubmit={handleAddCustomer}
+            onCancel={() => setShowAddCustomerDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Customer Dialog */}
+      <Dialog open={showEditCustomerDialog} onOpenChange={setShowEditCustomerDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Edit Customer</DialogTitle>
+            <DialogDescription>
+              Update customer details.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCustomer && (
+            <CustomerForm 
+              customer={selectedCustomer}
+              onSubmit={handleEditCustomer}
+              onCancel={() => {
+                setShowEditCustomerDialog(false);
+                setSelectedCustomer(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

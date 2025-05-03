@@ -9,6 +9,8 @@ import { MainLayout } from "./components/layouts/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import RepairIntake from "./pages/RepairIntake";
+import Inventory from "./pages/Inventory";
+import ContractTypes from "./pages/ContractTypes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,22 @@ const App = () => (
             element={
               <MainLayout>
                 <RepairIntake />
+              </MainLayout>
+            } 
+          />
+          <Route 
+            path="/inventory" 
+            element={
+              <MainLayout>
+                <Inventory />
+              </MainLayout>
+            } 
+          />
+          <Route 
+            path="/contract-types" 
+            element={
+              <MainLayout>
+                <ContractTypes />
               </MainLayout>
             } 
           />
