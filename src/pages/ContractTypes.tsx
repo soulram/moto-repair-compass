@@ -31,7 +31,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Plus, Edit, Trash } from "lucide-react";
+import { Plus, Edit, Trash, ChevronDown, ChevronRight } from "lucide-react";
 
 interface ContractType {
   id: string;
@@ -54,12 +54,20 @@ interface MaintenanceInterval {
   mileage: number;
   description: string;
   partReplacements: PartReplacement[];
+  services: ServiceItem[];
 }
 
 interface PartReplacement {
   id: string;
   partName: string;
   labor: number;
+}
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
 }
 
 export default function ContractTypes() {
@@ -82,6 +90,10 @@ export default function ContractTypes() {
           partReplacements: [
             { id: "p1", partName: "Oil filter", labor: 0.5 },
             { id: "p2", partName: "Engine oil", labor: 0.5 },
+          ],
+          services: [
+            { id: "s1", name: "Oil change", description: "Drain old oil and replace with new oil", duration: 0.5 },
+            { id: "s2", name: "Filter replacement", description: "Replace oil filter", duration: 0.3 },
           ]
         },
         {
@@ -91,6 +103,10 @@ export default function ContractTypes() {
           partReplacements: [
             { id: "p3", partName: "Spark plugs", labor: 1.0 },
             { id: "p4", partName: "Air filter", labor: 0.5 },
+          ],
+          services: [
+            { id: "s3", name: "Spark plug replacement", description: "Replace and gap spark plugs", duration: 1.0 },
+            { id: "s4", name: "Air filter cleaning", description: "Clean or replace air filter", duration: 0.5 },
           ]
         }
       ]
@@ -114,6 +130,10 @@ export default function ContractTypes() {
           partReplacements: [
             { id: "p5", partName: "Premium oil filter", labor: 0.5 },
             { id: "p6", partName: "Synthetic engine oil", labor: 0.5 },
+          ],
+          services: [
+            { id: "s5", name: "Synthetic oil change", description: "Drain old oil and replace with synthetic oil", duration: 0.5 },
+            { id: "s6", name: "Premium filter installation", description: "Replace with premium oil filter", duration: 0.3 },
           ]
         },
         {
@@ -124,6 +144,11 @@ export default function ContractTypes() {
             { id: "p7", partName: "Iridium spark plugs", labor: 1.0 },
             { id: "p8", partName: "Premium air filter", labor: 0.5 },
             { id: "p9", partName: "Fuel filter", labor: 1.0 },
+          ],
+          services: [
+            { id: "s7", name: "Iridium spark plug installation", description: "Replace with iridium spark plugs", duration: 1.0 },
+            { id: "s8", name: "Air filter replacement", description: "Replace with premium air filter", duration: 0.5 },
+            { id: "s9", name: "Fuel system cleaning", description: "Clean fuel injectors and replace filter", duration: 1.0 },
           ]
         }
       ]
@@ -131,6 +156,14 @@ export default function ContractTypes() {
   ]);
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [expandedIntervals, setExpandedIntervals] = useState<Record<string, boolean>>({});
+
+  const toggleInterval = (intervalId: string) => {
+    setExpandedIntervals(prev => ({
+      ...prev,
+      [intervalId]: !prev[intervalId]
+    }));
+  };
 
   const formSchema = z.object({
     name: z.string().min(1, "Contract name is required"),
@@ -229,7 +262,7 @@ export default function ContractTypes() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="basic">
+          <Tabs defaultValue="1">
             <TabsList className="mb-4">
               {contractTypes.map((contract) => (
                 <TabsTrigger key={contract.id} value={contract.id}>
@@ -289,24 +322,105 @@ export default function ContractTypes() {
                           <TableRow>
                             <TableHead>Mileage</TableHead>
                             <TableHead>Description</TableHead>
-                            <TableHead>Parts</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {contract.maintenanceIntervals.map((interval) => (
-                            <TableRow key={interval.id}>
-                              <TableCell>{interval.mileage} miles</TableCell>
-                              <TableCell>{interval.description}</TableCell>
-                              <TableCell>{interval.partReplacements.length} parts</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="ghost" size="sm">
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
+                            <React.Fragment key={interval.id}>
+                              <TableRow>
+                                <TableCell>{interval.mileage} miles</TableCell>
+                                <TableCell>{interval.description}</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => toggleInterval(interval.id)}
+                                    >
+                                      {expandedIntervals[interval.id] ? 
+                                        <ChevronDown className="h-4 w-4" /> : 
+                                        <ChevronRight className="h-4 w-4" />}
+                                      <span className="ml-2">Details</span>
+                                    </Button>
+                                    <Button variant="ghost" size="sm">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                              {expandedIntervals[interval.id] && (
+                                <TableRow>
+                                  <TableCell colSpan={3} className="bg-muted/30 p-0">
+                                    <div className="p-4">
+                                      <div className="mb-4">
+                                        <h4 className="text-md font-medium mb-2">Parts to Replace</h4>
+                                        <div className="border rounded-md">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHead>Part Name</TableHead>
+                                                <TableHead>Labor Hours</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {interval.partReplacements.map((part) => (
+                                                <TableRow key={part.id}>
+                                                  <TableCell>{part.partName}</TableCell>
+                                                  <TableCell>{part.labor} hrs</TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button variant="ghost" size="sm">
+                                                      <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                        <Button variant="outline" size="sm" className="mt-2">
+                                          <Plus className="mr-2 h-4 w-4" /> Add Part
+                                        </Button>
+                                      </div>
+                                      
+                                      <div>
+                                        <h4 className="text-md font-medium mb-2">Services to Perform</h4>
+                                        <div className="border rounded-md">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHead>Service Name</TableHead>
+                                                <TableHead>Description</TableHead>
+                                                <TableHead>Duration (hrs)</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {interval.services.map((service) => (
+                                                <TableRow key={service.id}>
+                                                  <TableCell>{service.name}</TableCell>
+                                                  <TableCell>{service.description}</TableCell>
+                                                  <TableCell>{service.duration} hrs</TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button variant="ghost" size="sm">
+                                                      <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                        <Button variant="outline" size="sm" className="mt-2">
+                                          <Plus className="mr-2 h-4 w-4" /> Add Service
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
                           ))}
                         </TableBody>
                       </Table>
