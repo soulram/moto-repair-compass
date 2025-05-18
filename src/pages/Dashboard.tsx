@@ -12,6 +12,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   // Mock data - would come from an API in a real application
@@ -43,8 +44,10 @@ export default function Dashboard() {
           <Button variant="outline">
             <Calendar className="mr-2 h-4 w-4" /> Calendar View
           </Button>
-          <Button>
-            <Clock className="mr-2 h-4 w-4" /> New Repair Intake
+          <Button asChild>
+            <Link to="/repair-intake">
+              <Clock className="mr-2 h-4 w-4" /> New Repair Intake
+            </Link>
           </Button>
         </div>
       </div>
