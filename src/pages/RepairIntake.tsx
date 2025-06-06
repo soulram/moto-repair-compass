@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle 
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer, Motorcycle, ChecklistStatus, ChecklistItem } from "@/types";
 import { CustomerChecklist } from "@/components/repair/CustomerChecklist";
@@ -14,7 +15,7 @@ import { MotorcycleSelectionTab } from "@/components/repair/MotorcycleSelectionT
 import { IntakeInfoTab } from "@/components/repair/IntakeInfoTab";
 import { ChecklistTab } from "@/components/repair/ChecklistTab";
 import { toast } from "sonner";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, Plus } from "lucide-react";
 
 export default function RepairIntake() {
   // Mock data - would come from an API in a real application
@@ -258,6 +259,22 @@ export default function RepairIntake() {
     });
   };
 
+  const startNewRepairIntake = () => {
+    // Reset all form state to start fresh
+    setSelectedCustomer(null);
+    setSelectedMotorcycle(null);
+    setMileage("");
+    setCustomerNotes("");
+    setSearchQuery("");
+    setActiveTab("customer");
+    setChecklistData([]);
+    setShowCustomerChecklist(false);
+    setCustomerConfirmed(false);
+    setCustomerComments("");
+    
+    toast.success("Started new repair intake");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -267,6 +284,10 @@ export default function RepairIntake() {
             Create a new repair order with comprehensive vehicle inspection
           </p>
         </div>
+        <Button onClick={startNewRepairIntake} variant="outline">
+          <Plus className="mr-2 h-4 w-4" />
+          New Repair Intake
+        </Button>
       </div>
 
       <Card>
