@@ -333,6 +333,7 @@ export default function RepairIntake() {
                 setMileage={setMileage}
                 customerNotes={customerNotes}
                 setCustomerNotes={setCustomerNotes}
+                customerContractType={selectedCustomer?.contractType}
                 onBack={() => setActiveTab("motorcycle")}
                 onNext={initializeChecklist}
               />
