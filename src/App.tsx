@@ -11,6 +11,7 @@ import Customers from "./pages/Customers";
 import RepairIntake from "./pages/RepairIntake";
 import Inventory from "./pages/Inventory";
 import ContractTypes from "./pages/ContractTypes";
+import ContractMonitoring from "./pages/ContractMonitoring";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,7 +63,14 @@ const App = () => (
               </MainLayout>
             } 
           />
-          {/* Future routes will be added here */}
+          <Route 
+            path="/contract-monitoring" 
+            element={
+              <MainLayout>
+                <ContractMonitoring />
+              </MainLayout>
+            } 
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

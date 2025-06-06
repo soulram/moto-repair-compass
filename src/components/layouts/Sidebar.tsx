@@ -21,7 +21,8 @@ import {
   FileText, 
   Settings, 
   Wrench,
-  FileCheck
+  FileCheck,
+  BarChart3
 } from "lucide-react";
 
 export function Sidebar() {
@@ -97,6 +98,15 @@ export function Sidebar() {
                   <Link to="/contract-types" className="flex items-center gap-3">
                     <FileCheck size={18} />
                     <span>Contract Types</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/contract-monitoring" className="flex items-center gap-3">
+                    <BarChart3 size={18} />
+                    <span>Contract Monitoring</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

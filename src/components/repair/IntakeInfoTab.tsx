@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ContractType } from "@/types";
+import { Search } from "lucide-react";
 
 interface ServiceRecommendation {
   mileage: number;
@@ -22,6 +23,9 @@ interface IntakeInfoTabProps {
   setMileage: (mileage: string) => void;
   customerNotes: string;
   setCustomerNotes: (notes: string) => void;
+  frameNumber: string;
+  setFrameNumber: (frameNumber: string) => void;
+  onFrameNumberSearch: () => void;
   onBack: () => void;
   onNext: () => void;
   customerContractType?: ContractType;
@@ -72,6 +76,9 @@ export function IntakeInfoTab({
   setMileage,
   customerNotes,
   setCustomerNotes,
+  frameNumber,
+  setFrameNumber,
+  onFrameNumberSearch,
   onBack,
   onNext,
   customerContractType = "basic",
@@ -93,16 +100,20 @@ export function IntakeInfoTab({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="currentMileage">Current Mileage</Label>
-          <Input
-            id="currentMileage"
-            type="number"
-            placeholder="Enter current mileage"
-            value={mileage}
-            onChange={(e) => setMileage(e.target.value)}
-          />
+          <Label htmlFor="frameNumber">Frame Number (VIN)</Label>
+          <div className="flex gap-2">
+            <Input
+              id="frameNumber"
+              placeholder="Enter frame number"
+              value={frameNumber}
+              onChange={(e) => setFrameNumber(e.target.value)}
+            />
+            <Button onClick={onFrameNumberSearch} variant="outline" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="repairType">Repair Type</Label>
           <Select>
@@ -116,6 +127,19 @@ export function IntakeInfoTab({
               <SelectItem value="warranty">Warranty Work</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="currentMileage">Current Mileage</Label>
+          <Input
+            id="currentMileage"
+            type="number"
+            placeholder="Enter current mileage"
+            value={mileage}
+            onChange={(e) => setMileage(e.target.value)}
+          />
         </div>
       </div>
 

@@ -132,6 +132,7 @@ export default function RepairIntake() {
   const [selectedMotorcycle, setSelectedMotorcycle] = useState<Motorcycle | null>(null);
   const [mileage, setMileage] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
+  const [frameNumber, setFrameNumber] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("customer");
   
@@ -164,6 +165,33 @@ export default function RepairIntake() {
   const handleMotorcycleSelect = (motorcycle: Motorcycle) => {
     setSelectedMotorcycle(motorcycle);
     setActiveTab("intake");
+  };
+
+  const handleFrameNumberSearch = () => {
+    if (!frameNumber.trim()) {
+      toast.error("Please enter a frame number");
+      return;
+    }
+
+    // Search for motorcycle by frame number
+    const foundMotorcycle = mockCustomers
+      .flatMap(customer => customer.motorcycles)
+      .find(motorcycle => motorcycle.vinNumber.toLowerCase() === frameNumber.toLowerCase());
+
+    if (foundMotorcycle) {
+      // Find the customer who owns this motorcycle
+      const customer = mockCustomers.find(c => c.motorcycles.some(m => m.id === foundMotorcycle.id));
+      
+      if (customer) {
+        setSelectedCustomer(customer);
+        setSelectedMotorcycle(foundMotorcycle);
+        setMileage(foundMotorcycle.currentMileage.toString());
+        toast.success(`Found motorcycle: ${foundMotorcycle.make} ${foundMotorcycle.model}`);
+        setActiveTab("intake");
+      }
+    } else {
+      toast.error("Frame number not found in the database");
+    }
   };
 
   const initializeChecklist = () => {
@@ -265,6 +293,7 @@ export default function RepairIntake() {
     setSelectedMotorcycle(null);
     setMileage("");
     setCustomerNotes("");
+    setFrameNumber("");
     setSearchQuery("");
     setActiveTab("customer");
     setChecklistData([]);
@@ -333,6 +362,9 @@ export default function RepairIntake() {
                 setMileage={setMileage}
                 customerNotes={customerNotes}
                 setCustomerNotes={setCustomerNotes}
+                frameNumber={frameNumber}
+                setFrameNumber={setFrameNumber}
+                onFrameNumberSearch={handleFrameNumberSearch}
                 customerContractType={selectedCustomer?.contractType}
                 onBack={() => setActiveTab("motorcycle")}
                 onNext={initializeChecklist}
