@@ -12,6 +12,7 @@ import RepairIntake from "./pages/RepairIntake";
 import Inventory from "./pages/Inventory";
 import ContractTypes from "./pages/ContractTypes";
 import ContractMonitoring from "./pages/ContractMonitoring";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route 
             path="/" 
             element={
