@@ -12,6 +12,7 @@ import RepairIntake from "./pages/RepairIntake";
 import Inventory from "./pages/Inventory";
 import ContractTypes from "./pages/ContractTypes";
 import ContractMonitoring from "./pages/ContractMonitoring";
+import Schedule from "./pages/Schedule";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -60,6 +61,16 @@ const App = () => (
               <ProtectedRoute>
                 <MainLayout>
                   <RepairIntake />
+                </MainLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/schedule" 
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Schedule />
                 </MainLayout>
               </ProtectedRoute>
             } 
