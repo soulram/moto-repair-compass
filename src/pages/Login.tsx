@@ -23,6 +23,8 @@ const Login = () => {
     try {
       // For demo purposes, accept any email/password
       if (email && password) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
         toast({
           title: "Login successful",
           description: "Welcome to MotoRepair Management",

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./components/layouts/MainLayout";
 
 import Dashboard from "./pages/Dashboard";
@@ -17,6 +17,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Simple auth check - in a real app this would check actual auth state
+const isAuthenticated = () => {
+  return localStorage.getItem('isLoggedIn') === 'true';
+};
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -28,49 +37,61 @@ const App = () => (
           <Route 
             path="/" 
             element={
-              <MainLayout>
-                <Dashboard />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <Dashboard />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/customers" 
             element={
-              <MainLayout>
-                <Customers />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <Customers />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/repair-intake" 
             element={
-              <MainLayout>
-                <RepairIntake />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <RepairIntake />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/inventory" 
             element={
-              <MainLayout>
-                <Inventory />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <Inventory />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/contract-types" 
             element={
-              <MainLayout>
-                <ContractTypes />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <ContractTypes />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/contract-monitoring" 
             element={
-              <MainLayout>
-                <ContractMonitoring />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <ContractMonitoring />
+                </MainLayout>
+              </ProtectedRoute>
             } 
           />
           <Route path="*" element={<NotFound />} />

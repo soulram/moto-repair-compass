@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Home, 
   Users, 
@@ -22,10 +22,26 @@ import {
   Settings, 
   Wrench,
   FileCheck,
-  BarChart3
+  BarChart3,
+  LogOut
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function Sidebar() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of MotoRepair Management",
+    });
+    navigate('/login');
+  };
+
   return (
     <SidebarComponent>
       <SidebarHeader className="p-4">
@@ -124,6 +140,19 @@ export function Sidebar() {
                     <Settings size={18} />
                     <span>Settings</span>
                   </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-2 h-auto text-white hover:bg-white/10"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={18} className="mr-3" />
+                    <span>Logout</span>
+                  </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

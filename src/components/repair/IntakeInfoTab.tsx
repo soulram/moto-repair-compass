@@ -31,6 +31,16 @@ interface IntakeInfoTabProps {
   customerContractType?: ContractType;
 }
 
+// Mock frame numbers for partial search demonstration
+const mockFrameNumbers = [
+  "JH2PC37G9MC700100",
+  "WB10408C5JZ123456",
+  "JH2PC37G9MC700101",
+  "WB10408C5JZ123457",
+  "JH2PC37G9MC700102",
+  "WB10408C5JZ123458"
+];
+
 // Service recommendations based on mileage and contract type
 const serviceRecommendations: ServiceRecommendation[] = [
   {
@@ -84,6 +94,16 @@ export function IntakeInfoTab({
   customerContractType = "basic",
 }: IntakeInfoTabProps) {
   
+  // Get matching frame numbers for partial search
+  const getMatchingFrameNumbers = () => {
+    if (!frameNumber.trim()) return [];
+    return mockFrameNumbers.filter(fn => 
+      fn.toLowerCase().includes(frameNumber.toLowerCase())
+    );
+  };
+
+  const matchingFrameNumbers = getMatchingFrameNumbers();
+  
   const getRecommendedServices = () => {
     const currentMileage = parseInt(mileage);
     if (!currentMileage) return [];
@@ -96,22 +116,49 @@ export function IntakeInfoTab({
 
   const recommendedServices = getRecommendedServices();
 
+  const handleFrameNumberSelect = (selectedFrameNumber: string) => {
+    setFrameNumber(selectedFrameNumber);
+    onFrameNumberSearch();
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="frameNumber">Frame Number (VIN)</Label>
           <div className="flex gap-2">
-            <Input
-              id="frameNumber"
-              placeholder="Enter frame number"
-              value={frameNumber}
-              onChange={(e) => setFrameNumber(e.target.value)}
-            />
+            <div className="flex-1 relative">
+              <Input
+                id="frameNumber"
+                placeholder="Enter partial or full frame number"
+                value={frameNumber}
+                onChange={(e) => setFrameNumber(e.target.value)}
+              />
+              
+              {/* Show matching frame numbers dropdown */}
+              {frameNumber && matchingFrameNumbers.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  {matchingFrameNumbers.map((fn, index) => (
+                    <div
+                      key={index}
+                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      onClick={() => handleFrameNumberSelect(fn)}
+                    >
+                      {fn}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button onClick={onFrameNumberSearch} variant="outline" size="icon">
               <Search className="h-4 w-4" />
             </Button>
           </div>
+          {frameNumber && matchingFrameNumbers.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No matching frame numbers found
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
