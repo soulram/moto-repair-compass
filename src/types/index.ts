@@ -38,10 +38,13 @@ export type RepairStatus = 'pending' | 'in-progress' | 'on-hold' | 'completed' |
 
 export type ChecklistStatus = 'ok' | 'monitor' | 'replace' | 'not-checked';
 
+export type ChecklistItemType = 'N' | 'V' | 'R';
+
 export interface ChecklistItem {
   id: string;
   name: string;
   category: string;
+  type: ChecklistItemType;
   status: ChecklistStatus;
   notes: string;
   requiresAttention: boolean;

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -49,6 +48,7 @@ interface ChecklistItem {
   id: string;
   name: string;
   category: string;
+  type: 'N' | 'V' | 'R';
   required: boolean;
 }
 
@@ -81,9 +81,9 @@ export default function ContractTypes() {
       description: "Covers regular maintenance services",
       price: 199.99,
       checklistItems: [
-        { id: "c1", name: "Brake inspection", category: "Safety", required: true },
-        { id: "c2", name: "Tire pressure check", category: "Safety", required: true },
-        { id: "c3", name: "Oil level check", category: "Fluids", required: true },
+        { id: "c1", name: "Brake inspection", category: "Safety", type: "V", required: true },
+        { id: "c2", name: "Tire pressure check", category: "Safety", type: "V", required: true },
+        { id: "c3", name: "Oil level check", category: "Fluids", type: "V", required: true },
       ],
       maintenanceIntervals: [
         {
@@ -120,10 +120,10 @@ export default function ContractTypes() {
       description: "Comprehensive maintenance with priority service",
       price: 399.99,
       checklistItems: [
-        { id: "c4", name: "Full brake system inspection", category: "Safety", required: true },
-        { id: "c5", name: "Tire and wheel inspection", category: "Safety", required: true },
-        { id: "c6", name: "Complete fluid level check", category: "Fluids", required: true },
-        { id: "c7", name: "Battery test", category: "Electrical", required: true },
+        { id: "c4", name: "Full brake system inspection", category: "Safety", type: "V", required: true },
+        { id: "c5", name: "Tire and wheel inspection", category: "Safety", type: "V", required: true },
+        { id: "c6", name: "Complete fluid level check", category: "Fluids", type: "V", required: true },
+        { id: "c7", name: "Battery test", category: "Electrical", type: "N", required: true },
       ],
       maintenanceIntervals: [
         {
@@ -190,6 +190,7 @@ export default function ContractTypes() {
   const checklistItemFormSchema = z.object({
     name: z.string().min(1, "Item name is required"),
     category: z.string().min(1, "Category is required"),
+    type: z.enum(['N', 'V', 'R'], { required_error: "Type is required" }),
     required: z.boolean().default(false)
   });
 
@@ -227,6 +228,7 @@ export default function ContractTypes() {
     defaultValues: {
       name: "",
       category: "",
+      type: "N",
       required: false
     },
   });
@@ -299,7 +301,7 @@ export default function ContractTypes() {
                 ...contract, 
                 checklistItems: contract.checklistItems.map(item => 
                   item.id === editingChecklistItemId 
-                    ? { ...item, name: data.name, category: data.category, required: data.required } 
+                    ? { ...item, name: data.name, category: data.category, type: data.type, required: data.required } 
                     : item
                 ) 
               } 
@@ -313,6 +315,7 @@ export default function ContractTypes() {
         id: `c${Date.now()}`,
         name: data.name,
         category: data.category,
+        type: data.type,
         required: data.required
       };
       
@@ -505,6 +508,7 @@ export default function ContractTypes() {
     checklistItemForm.reset({
       name: item.name,
       category: item.category,
+      type: item.type,
       required: item.required
     });
     setIsChecklistItemDialogOpen(true);
@@ -545,6 +549,7 @@ export default function ContractTypes() {
     checklistItemForm.reset({
       name: "",
       category: "",
+      type: "N",
       required: false
     });
     setIsChecklistItemDialogOpen(true);
@@ -668,6 +673,7 @@ export default function ContractTypes() {
                           <TableRow>
                             <TableHead>Item Name</TableHead>
                             <TableHead>Category</TableHead>
+                            <TableHead>Type</TableHead>
                             <TableHead>Required</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
@@ -677,6 +683,15 @@ export default function ContractTypes() {
                             <TableRow key={item.id}>
                               <TableCell>{item.name}</TableCell>
                               <TableCell>{item.category}</TableCell>
+                              <TableCell>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  item.type === 'N' ? 'bg-blue-100 text-blue-800' :
+                                  item.type === 'V' ? 'bg-green-100 text-green-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {item.type}
+                                </span>
+                              </TableCell>
                               <TableCell>{item.required ? "Yes" : "No"}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">
@@ -1030,6 +1045,33 @@ export default function ContractTypes() {
                           <SelectItem value="Electrical">Electrical</SelectItem>
                           <SelectItem value="Chassis">Chassis</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={checklistItemForm.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">N</SelectItem>
+                          <SelectItem value="V">V</SelectItem>
+                          <SelectItem value="R">R</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
