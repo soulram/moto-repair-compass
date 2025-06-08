@@ -29,6 +29,10 @@ const formSchema = z.object({
   phone: z.string().min(6, "Phone number is required"),
   address: z.string().min(3, "Address is required"),
   contractType: z.enum(["none", "basic", "premium", "inclusive"]),
+  frameNumber: z.string().optional(),
+  motorcycleMake: z.string().optional(),
+  motorcycleModel: z.string().optional(),
+  motorcycleYear: z.string().optional(),
 });
 
 interface CustomerFormProps {
@@ -47,6 +51,10 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       phone: customer?.phone || "",
       address: customer?.address || "",
       contractType: customer?.contractType || "none",
+      frameNumber: customer?.motorcycles?.[0]?.vinNumber || "",
+      motorcycleMake: customer?.motorcycles?.[0]?.make || "",
+      motorcycleModel: customer?.motorcycles?.[0]?.model || "",
+      motorcycleYear: customer?.motorcycles?.[0]?.year?.toString() || "",
     },
   });
 
@@ -151,6 +159,68 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             </FormItem>
           )}
         />
+
+        <div className="border-t pt-4">
+          <h3 className="text-lg font-medium mb-4">Motorcycle Information</h3>
+          
+          <FormField
+            control={form.control}
+            name="frameNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Frame Number (VIN)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Frame Number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <FormField
+              control={form.control}
+              name="motorcycleMake"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Make</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Honda, BMW, etc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="motorcycleModel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Model</FormLabel>
+                  <FormControl>
+                    <Input placeholder="CBR600, R1200GS, etc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="motorcycleYear"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Year</FormLabel>
+                  <FormControl>
+                    <Input placeholder="2023" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <div className="flex justify-end space-x-4 pt-4">
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
