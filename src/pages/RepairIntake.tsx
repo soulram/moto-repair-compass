@@ -86,44 +86,44 @@ export default function RepairIntake() {
       name: "Engine & Transmission",
       icon: <CheckSquare className="h-5 w-5 text-blue-500" />,
       items: [
-        { id: "e1", name: "Engine oil level", category: "engine" },
-        { id: "e2", name: "Engine oil condition", category: "engine" },
-        { id: "e3", name: "Coolant level and condition", category: "engine" },
-        { id: "e4", name: "Transmission oil level", category: "engine" },
-        { id: "e5", name: "Engine mounts", category: "engine" }
+        { id: "e1", name: "Engine oil level", category: "engine", type: "V" as const },
+        { id: "e2", name: "Engine oil condition", category: "engine", type: "V" as const },
+        { id: "e3", name: "Coolant level and condition", category: "engine", type: "V" as const },
+        { id: "e4", name: "Transmission oil level", category: "engine", type: "V" as const },
+        { id: "e5", name: "Engine mounts", category: "engine", type: "V" as const }
       ]
     },
     {
       name: "Brakes & Suspension",
       icon: <CheckSquare className="h-5 w-5 text-red-500" />,
       items: [
-        { id: "b1", name: "Front brake pads", category: "brakes" },
-        { id: "b2", name: "Rear brake pads", category: "brakes" },
-        { id: "b3", name: "Brake fluid level", category: "brakes" },
-        { id: "b4", name: "Front fork condition", category: "suspension" },
-        { id: "b5", name: "Rear shock condition", category: "suspension" }
+        { id: "b1", name: "Front brake pads", category: "brakes", type: "R" as const },
+        { id: "b2", name: "Rear brake pads", category: "brakes", type: "R" as const },
+        { id: "b3", name: "Brake fluid level", category: "brakes", type: "V" as const },
+        { id: "b4", name: "Front fork condition", category: "suspension", type: "V" as const },
+        { id: "b5", name: "Rear shock condition", category: "suspension", type: "V" as const }
       ]
     },
     {
       name: "Electrical & Lighting",
       icon: <CheckSquare className="h-5 w-5 text-yellow-500" />,
       items: [
-        { id: "l1", name: "Headlight operation", category: "electrical" },
-        { id: "l2", name: "Tail light operation", category: "electrical" },
-        { id: "l3", name: "Turn signals", category: "electrical" },
-        { id: "l4", name: "Battery condition", category: "electrical" },
-        { id: "l5", name: "Charging system", category: "electrical" }
+        { id: "l1", name: "Headlight operation", category: "electrical", type: "N" as const },
+        { id: "l2", name: "Tail light operation", category: "electrical", type: "N" as const },
+        { id: "l3", name: "Turn signals", category: "electrical", type: "N" as const },
+        { id: "l4", name: "Battery condition", category: "electrical", type: "V" as const },
+        { id: "l5", name: "Charging system", category: "electrical", type: "V" as const }
       ]
     },
     {
       name: "Tires & Wheels",
       icon: <CheckSquare className="h-5 w-5 text-green-500" />,
       items: [
-        { id: "t1", name: "Front tire tread", category: "tires" },
-        { id: "t2", name: "Rear tire tread", category: "tires" },
-        { id: "t3", name: "Tire pressure", category: "tires" },
-        { id: "t4", name: "Wheel bearings", category: "wheels" },
-        { id: "t5", name: "Wheel alignment", category: "wheels" }
+        { id: "t1", name: "Front tire tread", category: "tires", type: "V" as const },
+        { id: "t2", name: "Rear tire tread", category: "tires", type: "V" as const },
+        { id: "t3", name: "Tire pressure", category: "tires", type: "V" as const },
+        { id: "t4", name: "Wheel bearings", category: "wheels", type: "V" as const },
+        { id: "t5", name: "Wheel alignment", category: "wheels", type: "V" as const }
       ]
     }
   ];
@@ -203,6 +203,7 @@ export default function RepairIntake() {
           id: item.id,
           name: item.name,
           category: item.category,
+          type: item.type,
           status: "not-checked",
           notes: "",
           requiresAttention: false
