@@ -41,7 +41,6 @@ interface ContractType {
   description: string;
   price: number;
   partsAllowance: number;
-  checklistItems: ChecklistItem[];
   maintenanceIntervals: MaintenanceInterval[];
 }
 
@@ -57,6 +56,7 @@ interface MaintenanceInterval {
   id: string;
   mileage: number;
   description: string;
+  checklistItems: ChecklistItem[];
   partReplacements: PartReplacement[];
   services: ServiceItem[];
 }
@@ -83,16 +83,15 @@ export default function ContractTypes() {
       description: "Covers regular maintenance services",
       price: 199.99,
       partsAllowance: 10,
-      checklistItems: [
-        { id: "c1", name: "Brake inspection", category: "Safety", type: "V", required: true },
-        { id: "c2", name: "Tire pressure check", category: "Safety", type: "V", required: true },
-        { id: "c3", name: "Oil level check", category: "Fluids", type: "V", required: true },
-      ],
       maintenanceIntervals: [
         {
           id: "m1",
           mileage: 3000,
           description: "Oil change service",
+          checklistItems: [
+            { id: "c1", name: "Engine oil level", category: "Fluids", type: "V", required: true },
+            { id: "c2", name: "Oil filter condition", category: "Fluids", type: "V", required: true },
+          ],
           partReplacements: [
             { id: "p1", partName: "Oil filter", quantity: 1, labor: 0.5 },
             { id: "p2", partName: "Engine oil", quantity: 4, labor: 0.5 },
@@ -106,6 +105,11 @@ export default function ContractTypes() {
           id: "m2",
           mileage: 6000,
           description: "Basic tune-up",
+          checklistItems: [
+            { id: "c3", name: "Spark plug condition", category: "Engine", type: "V", required: true },
+            { id: "c4", name: "Air filter condition", category: "Engine", type: "V", required: true },
+            { id: "c5", name: "Brake fluid level", category: "Safety", type: "V", required: true },
+          ],
           partReplacements: [
             { id: "p3", partName: "Spark plugs", quantity: 2, labor: 1.0 },
             { id: "p4", partName: "Air filter", quantity: 1, labor: 0.5 },
@@ -123,17 +127,16 @@ export default function ContractTypes() {
       description: "Comprehensive maintenance with priority service",
       price: 399.99,
       partsAllowance: 25,
-      checklistItems: [
-        { id: "c4", name: "Full brake system inspection", category: "Safety", type: "V", required: true },
-        { id: "c5", name: "Tire and wheel inspection", category: "Safety", type: "V", required: true },
-        { id: "c6", name: "Complete fluid level check", category: "Fluids", type: "V", required: true },
-        { id: "c7", name: "Battery test", category: "Electrical", type: "N", required: true },
-      ],
       maintenanceIntervals: [
         {
           id: "m3",
           mileage: 3000,
           description: "Premium oil service",
+          checklistItems: [
+            { id: "c6", name: "Engine oil quality check", category: "Fluids", type: "V", required: true },
+            { id: "c7", name: "Oil pressure test", category: "Engine", type: "N", required: true },
+            { id: "c8", name: "Filter housing inspection", category: "Engine", type: "V", required: true },
+          ],
           partReplacements: [
             { id: "p5", partName: "Premium oil filter", quantity: 1, labor: 0.5 },
             { id: "p6", partName: "Synthetic engine oil", quantity: 4, labor: 0.5 },
@@ -147,6 +150,12 @@ export default function ContractTypes() {
           id: "m4",
           mileage: 6000,
           description: "Enhanced tune-up",
+          checklistItems: [
+            { id: "c9", name: "Ignition system check", category: "Engine", type: "N", required: true },
+            { id: "c10", name: "Fuel system inspection", category: "Engine", type: "V", required: true },
+            { id: "c11", name: "Complete brake inspection", category: "Safety", type: "V", required: true },
+            { id: "c12", name: "Electrical system test", category: "Electrical", type: "N", required: true },
+          ],
           partReplacements: [
             { id: "p7", partName: "Iridium spark plugs", quantity: 2, labor: 1.0 },
             { id: "p8", partName: "Premium air filter", quantity: 1, labor: 0.5 },
@@ -183,7 +192,6 @@ export default function ContractTypes() {
     }));
   };
 
-  // Schema for creating/editing contract types
   const contractFormSchema = z.object({
     name: z.string().min(1, "Contract name is required"),
     description: z.string().min(1, "Description is required"),
@@ -191,7 +199,6 @@ export default function ContractTypes() {
     partsAllowance: z.coerce.number().min(0, "Parts allowance must be positive")
   });
 
-  // Schema for creating/editing checklist items
   const checklistItemFormSchema = z.object({
     name: z.string().min(1, "Item name is required"),
     category: z.string().min(1, "Category is required"),
@@ -199,27 +206,23 @@ export default function ContractTypes() {
     required: z.boolean().default(false)
   });
 
-  // Schema for creating/editing maintenance intervals
   const maintenanceIntervalFormSchema = z.object({
     mileage: z.coerce.number().min(1, "Mileage must be at least 1"),
     description: z.string().min(1, "Description is required")
   });
 
-  // Schema for creating/editing parts
   const partFormSchema = z.object({
     partName: z.string().min(1, "Part name is required"),
     quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
     labor: z.coerce.number().min(0, "Labor hours must be positive")
   });
 
-  // Schema for creating/editing services
   const serviceFormSchema = z.object({
     name: z.string().min(1, "Service name is required"),
     description: z.string().min(1, "Description is required"),
     duration: z.coerce.number().min(0, "Duration must be positive")
   });
 
-  // Forms
   const contractForm = useForm<z.infer<typeof contractFormSchema>>({
     resolver: zodResolver(contractFormSchema),
     defaultValues: {
@@ -266,12 +269,10 @@ export default function ContractTypes() {
     },
   });
 
-  // Function to find the active contract
   const getActiveContract = () => {
     return contractTypes.find(contract => contract.id === activeContractId);
   };
 
-  // Form submission handlers
   const onCreateContractSubmit = (data: z.infer<typeof contractFormSchema>) => {
     const newContractType: ContractType = {
       id: `${contractTypes.length + 1}`,
@@ -279,7 +280,6 @@ export default function ContractTypes() {
       description: data.description,
       price: data.price,
       partsAllowance: data.partsAllowance,
-      checklistItems: [],
       maintenanceIntervals: []
     };
     
@@ -302,16 +302,22 @@ export default function ContractTypes() {
 
   const onChecklistItemSubmit = (data: z.infer<typeof checklistItemFormSchema>) => {
     if (editingChecklistItemId) {
-      // Edit existing checklist item
       setContractTypes(prevContractTypes => 
         prevContractTypes.map(contract => 
           contract.id === activeContractId 
             ? { 
                 ...contract, 
-                checklistItems: contract.checklistItems.map(item => 
-                  item.id === editingChecklistItemId 
-                    ? { ...item, name: data.name, category: data.category, type: data.type, required: data.required } 
-                    : item
+                maintenanceIntervals: contract.maintenanceIntervals.map(interval => 
+                  interval.id === editingIntervalId 
+                    ? {
+                        ...interval,
+                        checklistItems: interval.checklistItems.map(item => 
+                          item.id === editingChecklistItemId 
+                            ? { ...item, name: data.name, category: data.category, type: data.type, required: data.required } 
+                            : item
+                        )
+                      }
+                    : interval
                 ) 
               } 
             : contract
@@ -319,7 +325,6 @@ export default function ContractTypes() {
       );
       setEditingChecklistItemId("");
     } else {
-      // Add new checklist item
       const newChecklistItem: ChecklistItem = {
         id: `c${Date.now()}`,
         name: data.name,
@@ -333,7 +338,14 @@ export default function ContractTypes() {
           contract.id === activeContractId 
             ? { 
                 ...contract, 
-                checklistItems: [...contract.checklistItems, newChecklistItem] 
+                maintenanceIntervals: contract.maintenanceIntervals.map(interval => 
+                  interval.id === editingIntervalId 
+                    ? {
+                        ...interval,
+                        checklistItems: [...interval.checklistItems, newChecklistItem]
+                      }
+                    : interval
+                ) 
               } 
             : contract
         )
@@ -346,7 +358,6 @@ export default function ContractTypes() {
 
   const onMaintenanceIntervalSubmit = (data: z.infer<typeof maintenanceIntervalFormSchema>) => {
     if (editingIntervalId) {
-      // Edit existing maintenance interval
       setContractTypes(prevContractTypes => 
         prevContractTypes.map(contract => 
           contract.id === activeContractId 
@@ -363,11 +374,11 @@ export default function ContractTypes() {
       );
       setEditingIntervalId("");
     } else {
-      // Add new maintenance interval
       const newMaintenanceInterval: MaintenanceInterval = {
         id: `m${Date.now()}`,
         mileage: data.mileage,
         description: data.description,
+        checklistItems: [],
         partReplacements: [],
         services: []
       };
@@ -390,7 +401,6 @@ export default function ContractTypes() {
 
   const onPartSubmit = (data: z.infer<typeof partFormSchema>) => {
     if (editingPartId) {
-      // Edit existing part
       setContractTypes(prevContractTypes => 
         prevContractTypes.map(contract => 
           contract.id === activeContractId 
@@ -414,7 +424,6 @@ export default function ContractTypes() {
       );
       setEditingPartId("");
     } else {
-      // Add new part
       const newPart: PartReplacement = {
         id: `p${Date.now()}`,
         partName: data.partName,
@@ -447,7 +456,6 @@ export default function ContractTypes() {
 
   const onServiceSubmit = (data: z.infer<typeof serviceFormSchema>) => {
     if (editingServiceId) {
-      // Edit existing service
       setContractTypes(prevContractTypes => 
         prevContractTypes.map(contract => 
           contract.id === activeContractId 
@@ -471,7 +479,6 @@ export default function ContractTypes() {
       );
       setEditingServiceId("");
     } else {
-      // Add new service
       const newService: ServiceItem = {
         id: `s${Date.now()}`,
         name: data.name,
@@ -502,7 +509,6 @@ export default function ContractTypes() {
     serviceForm.reset();
   };
 
-  // Handlers for opening edit dialogs
   const handleEditContract = (contract: ContractType) => {
     setEditingContractId(contract.id);
     contractForm.reset({
@@ -514,7 +520,8 @@ export default function ContractTypes() {
     setIsEditContractDialogOpen(true);
   };
 
-  const handleEditChecklistItem = (item: ChecklistItem) => {
+  const handleEditChecklistItem = (intervalId: string, item: ChecklistItem) => {
+    setEditingIntervalId(intervalId);
     setEditingChecklistItemId(item.id);
     checklistItemForm.reset({
       name: item.name,
@@ -556,7 +563,8 @@ export default function ContractTypes() {
     setIsServiceDialogOpen(true);
   };
 
-  const handleAddChecklistItem = () => {
+  const handleAddChecklistItem = (intervalId: string) => {
+    setEditingIntervalId(intervalId);
     setEditingChecklistItemId("");
     checklistItemForm.reset({
       name: "",
@@ -627,7 +635,6 @@ export default function ContractTypes() {
                 <TableHead>Description</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Parts Allowance (qty)</TableHead>
-                <TableHead>Checklist Items</TableHead>
                 <TableHead>Maintenance Intervals</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -639,7 +646,6 @@ export default function ContractTypes() {
                   <TableCell>{contract.description}</TableCell>
                   <TableCell>${contract.price.toFixed(2)}</TableCell>
                   <TableCell>{contract.partsAllowance} parts</TableCell>
-                  <TableCell>{contract.checklistItems.length} items</TableCell>
                   <TableCell>{contract.maintenanceIntervals.length} intervals</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -679,56 +685,8 @@ export default function ContractTypes() {
               <TabsContent key={contract.id} value={contract.id}>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium">Checklist Items</h3>
-                    <p className="text-muted-foreground mb-4">Items to be checked during each service</p>
-                    
-                    <div className="border rounded-md">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Item Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Required</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {contract.checklistItems.map((item) => (
-                            <TableRow key={item.id}>
-                              <TableCell>{item.name}</TableCell>
-                              <TableCell>{item.category}</TableCell>
-                              <TableCell>
-                                <span className={`px-2 py-1 text-xs rounded-full ${
-                                  item.type === 'N' ? 'bg-blue-100 text-blue-800' :
-                                  item.type === 'V' ? 'bg-green-100 text-green-800' :
-                                  'bg-red-100 text-red-800'
-                                }`}>
-                                  {item.type}
-                                </span>
-                              </TableCell>
-                              <TableCell>{item.required ? "Yes" : "No"}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="ghost" size="sm" onClick={() => handleEditChecklistItem(item)}>
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    
-                    <Button variant="outline" size="sm" className="mt-4" onClick={handleAddChecklistItem}>
-                      <Plus className="mr-2 h-4 w-4" /> Add Checklist Item
-                    </Button>
-                  </div>
-                  
-                  <div>
                     <h3 className="text-lg font-medium">Maintenance Intervals</h3>
-                    <p className="text-muted-foreground mb-4">Schedule of services based on mileage</p>
+                    <p className="text-muted-foreground mb-4">Schedule of services based on mileage with specific checklist items</p>
                     
                     <div className="border rounded-md">
                       <Table>
@@ -736,6 +694,7 @@ export default function ContractTypes() {
                           <TableRow>
                             <TableHead>Mileage</TableHead>
                             <TableHead>Description</TableHead>
+                            <TableHead>Checklist Items</TableHead>
                             <TableHead>Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -745,6 +704,7 @@ export default function ContractTypes() {
                               <TableRow>
                                 <TableCell>{interval.mileage} miles</TableCell>
                                 <TableCell>{interval.description}</TableCell>
+                                <TableCell>{interval.checklistItems.length} items</TableCell>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <Button 
@@ -769,8 +729,60 @@ export default function ContractTypes() {
                               </TableRow>
                               {expandedIntervals[interval.id] && (
                                 <TableRow>
-                                  <TableCell colSpan={3} className="bg-muted/30 p-0">
+                                  <TableCell colSpan={4} className="bg-muted/30 p-0">
                                     <div className="p-4">
+                                      <div className="mb-4">
+                                        <h4 className="text-md font-medium mb-2">Checklist Items for {interval.mileage} miles</h4>
+                                        <div className="border rounded-md">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHead>Item Name</TableHead>
+                                                <TableHead>Category</TableHead>
+                                                <TableHead>Type</TableHead>
+                                                <TableHead>Required</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {interval.checklistItems.map((item) => (
+                                                <TableRow key={item.id}>
+                                                  <TableCell>{item.name}</TableCell>
+                                                  <TableCell>{item.category}</TableCell>
+                                                  <TableCell>
+                                                    <span className={`px-2 py-1 text-xs rounded-full ${
+                                                      item.type === 'N' ? 'bg-blue-100 text-blue-800' :
+                                                      item.type === 'V' ? 'bg-green-100 text-green-800' :
+                                                      'bg-red-100 text-red-800'
+                                                    }`}>
+                                                      {item.type}
+                                                    </span>
+                                                  </TableCell>
+                                                  <TableCell>{item.required ? "Yes" : "No"}</TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button 
+                                                      variant="ghost" 
+                                                      size="sm"
+                                                      onClick={() => handleEditChecklistItem(interval.id, item)}
+                                                    >
+                                                      <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="mt-2"
+                                          onClick={() => handleAddChecklistItem(interval.id)}
+                                        >
+                                          <Plus className="mr-2 h-4 w-4" /> Add Checklist Item
+                                        </Button>
+                                      </div>
+
                                       <div className="mb-4">
                                         <h4 className="text-md font-medium mb-2">Parts to Replace</h4>
                                         <div className="border rounded-md">
@@ -880,7 +892,6 @@ export default function ContractTypes() {
         </CardContent>
       </Card>
 
-      {/* Create Contract Type Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -959,7 +970,6 @@ export default function ContractTypes() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Contract Type Dialog */}
       <Dialog open={isEditContractDialogOpen} onOpenChange={setIsEditContractDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1038,7 +1048,6 @@ export default function ContractTypes() {
         </DialogContent>
       </Dialog>
 
-      {/* Checklist Item Dialog */}
       <Dialog open={isChecklistItemDialogOpen} onOpenChange={setIsChecklistItemDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1048,7 +1057,7 @@ export default function ContractTypes() {
             <DialogDescription>
               {editingChecklistItemId 
                 ? "Update the details for this checklist item." 
-                : "Add a new item to the service checklist."}
+                : "Add a new item to this maintenance interval's checklist."}
             </DialogDescription>
           </DialogHeader>
           
@@ -1088,6 +1097,7 @@ export default function ContractTypes() {
                           <SelectItem value="Performance">Performance</SelectItem>
                           <SelectItem value="Fluids">Fluids</SelectItem>
                           <SelectItem value="Electrical">Electrical</SelectItem>
+                          <SelectItem value="Engine">Engine</SelectItem>
                           <SelectItem value="Chassis">Chassis</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
@@ -1156,7 +1166,6 @@ export default function ContractTypes() {
         </DialogContent>
       </Dialog>
 
-      {/* Maintenance Interval Dialog */}
       <Dialog open={isMaintenanceIntervalDialogOpen} onOpenChange={setIsMaintenanceIntervalDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1217,7 +1226,6 @@ export default function ContractTypes() {
         </DialogContent>
       </Dialog>
 
-      {/* Part Dialog */}
       <Dialog open={isPartDialogOpen} onOpenChange={setIsPartDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1298,7 +1306,6 @@ export default function ContractTypes() {
         </DialogContent>
       </Dialog>
 
-      {/* Service Dialog */}
       <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
         <DialogContent>
           <DialogHeader>
