@@ -40,6 +40,7 @@ interface ContractType {
   name: string;
   description: string;
   price: number;
+  partsAllowance: number;
   checklistItems: ChecklistItem[];
   maintenanceIntervals: MaintenanceInterval[];
 }
@@ -63,6 +64,7 @@ interface MaintenanceInterval {
 interface PartReplacement {
   id: string;
   partName: string;
+  quantity: number;
   labor: number;
 }
 
@@ -80,6 +82,7 @@ export default function ContractTypes() {
       name: "Basic Service Contract",
       description: "Covers regular maintenance services",
       price: 199.99,
+      partsAllowance: 10,
       checklistItems: [
         { id: "c1", name: "Brake inspection", category: "Safety", type: "V", required: true },
         { id: "c2", name: "Tire pressure check", category: "Safety", type: "V", required: true },
@@ -91,8 +94,8 @@ export default function ContractTypes() {
           mileage: 3000,
           description: "Oil change service",
           partReplacements: [
-            { id: "p1", partName: "Oil filter", labor: 0.5 },
-            { id: "p2", partName: "Engine oil", labor: 0.5 },
+            { id: "p1", partName: "Oil filter", quantity: 1, labor: 0.5 },
+            { id: "p2", partName: "Engine oil", quantity: 4, labor: 0.5 },
           ],
           services: [
             { id: "s1", name: "Oil change", description: "Drain old oil and replace with new oil", duration: 0.5 },
@@ -104,8 +107,8 @@ export default function ContractTypes() {
           mileage: 6000,
           description: "Basic tune-up",
           partReplacements: [
-            { id: "p3", partName: "Spark plugs", labor: 1.0 },
-            { id: "p4", partName: "Air filter", labor: 0.5 },
+            { id: "p3", partName: "Spark plugs", quantity: 2, labor: 1.0 },
+            { id: "p4", partName: "Air filter", quantity: 1, labor: 0.5 },
           ],
           services: [
             { id: "s3", name: "Spark plug replacement", description: "Replace and gap spark plugs", duration: 1.0 },
@@ -119,6 +122,7 @@ export default function ContractTypes() {
       name: "Premium Service Contract",
       description: "Comprehensive maintenance with priority service",
       price: 399.99,
+      partsAllowance: 25,
       checklistItems: [
         { id: "c4", name: "Full brake system inspection", category: "Safety", type: "V", required: true },
         { id: "c5", name: "Tire and wheel inspection", category: "Safety", type: "V", required: true },
@@ -131,8 +135,8 @@ export default function ContractTypes() {
           mileage: 3000,
           description: "Premium oil service",
           partReplacements: [
-            { id: "p5", partName: "Premium oil filter", labor: 0.5 },
-            { id: "p6", partName: "Synthetic engine oil", labor: 0.5 },
+            { id: "p5", partName: "Premium oil filter", quantity: 1, labor: 0.5 },
+            { id: "p6", partName: "Synthetic engine oil", quantity: 4, labor: 0.5 },
           ],
           services: [
             { id: "s5", name: "Synthetic oil change", description: "Drain old oil and replace with synthetic oil", duration: 0.5 },
@@ -144,9 +148,9 @@ export default function ContractTypes() {
           mileage: 6000,
           description: "Enhanced tune-up",
           partReplacements: [
-            { id: "p7", partName: "Iridium spark plugs", labor: 1.0 },
-            { id: "p8", partName: "Premium air filter", labor: 0.5 },
-            { id: "p9", partName: "Fuel filter", labor: 1.0 },
+            { id: "p7", partName: "Iridium spark plugs", quantity: 2, labor: 1.0 },
+            { id: "p8", partName: "Premium air filter", quantity: 1, labor: 0.5 },
+            { id: "p9", partName: "Fuel filter", quantity: 1, labor: 1.0 },
           ],
           services: [
             { id: "s7", name: "Iridium spark plug installation", description: "Replace with iridium spark plugs", duration: 1.0 },
@@ -183,7 +187,8 @@ export default function ContractTypes() {
   const contractFormSchema = z.object({
     name: z.string().min(1, "Contract name is required"),
     description: z.string().min(1, "Description is required"),
-    price: z.coerce.number().min(0, "Price must be positive")
+    price: z.coerce.number().min(0, "Price must be positive"),
+    partsAllowance: z.coerce.number().min(0, "Parts allowance must be positive")
   });
 
   // Schema for creating/editing checklist items
@@ -203,6 +208,7 @@ export default function ContractTypes() {
   // Schema for creating/editing parts
   const partFormSchema = z.object({
     partName: z.string().min(1, "Part name is required"),
+    quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
     labor: z.coerce.number().min(0, "Labor hours must be positive")
   });
 
@@ -219,7 +225,8 @@ export default function ContractTypes() {
     defaultValues: {
       name: "",
       description: "",
-      price: 0
+      price: 0,
+      partsAllowance: 0
     },
   });
 
@@ -245,6 +252,7 @@ export default function ContractTypes() {
     resolver: zodResolver(partFormSchema),
     defaultValues: {
       partName: "",
+      quantity: 1,
       labor: 0
     },
   });
@@ -270,6 +278,7 @@ export default function ContractTypes() {
       name: data.name,
       description: data.description,
       price: data.price,
+      partsAllowance: data.partsAllowance,
       checklistItems: [],
       maintenanceIntervals: []
     };
@@ -283,7 +292,7 @@ export default function ContractTypes() {
     setContractTypes(prevContractTypes => 
       prevContractTypes.map(contract => 
         contract.id === editingContractId 
-          ? { ...contract, name: data.name, description: data.description, price: data.price } 
+          ? { ...contract, name: data.name, description: data.description, price: data.price, partsAllowance: data.partsAllowance } 
           : contract
       )
     );
@@ -393,7 +402,7 @@ export default function ContractTypes() {
                         ...interval,
                         partReplacements: interval.partReplacements.map(part => 
                           part.id === editingPartId 
-                            ? { ...part, partName: data.partName, labor: data.labor } 
+                            ? { ...part, partName: data.partName, quantity: data.quantity, labor: data.labor } 
                             : part
                         )
                       } 
@@ -409,6 +418,7 @@ export default function ContractTypes() {
       const newPart: PartReplacement = {
         id: `p${Date.now()}`,
         partName: data.partName,
+        quantity: data.quantity,
         labor: data.labor
       };
       
@@ -498,7 +508,8 @@ export default function ContractTypes() {
     contractForm.reset({
       name: contract.name,
       description: contract.description,
-      price: contract.price
+      price: contract.price,
+      partsAllowance: contract.partsAllowance
     });
     setIsEditContractDialogOpen(true);
   };
@@ -528,6 +539,7 @@ export default function ContractTypes() {
     setEditingPartId(part.id);
     partForm.reset({
       partName: part.partName,
+      quantity: part.quantity,
       labor: part.labor
     });
     setIsPartDialogOpen(true);
@@ -569,6 +581,7 @@ export default function ContractTypes() {
     setEditingPartId("");
     partForm.reset({
       partName: "",
+      quantity: 1,
       labor: 0
     });
     setIsPartDialogOpen(true);
@@ -613,6 +626,7 @@ export default function ContractTypes() {
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Parts Allowance (qty)</TableHead>
                 <TableHead>Checklist Items</TableHead>
                 <TableHead>Maintenance Intervals</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -624,6 +638,7 @@ export default function ContractTypes() {
                   <TableCell className="font-medium">{contract.name}</TableCell>
                   <TableCell>{contract.description}</TableCell>
                   <TableCell>${contract.price.toFixed(2)}</TableCell>
+                  <TableCell>{contract.partsAllowance} parts</TableCell>
                   <TableCell>{contract.checklistItems.length} items</TableCell>
                   <TableCell>{contract.maintenanceIntervals.length} intervals</TableCell>
                   <TableCell className="text-right">
@@ -763,6 +778,7 @@ export default function ContractTypes() {
                                             <TableHeader>
                                               <TableRow>
                                                 <TableHead>Part Name</TableHead>
+                                                <TableHead>Quantity</TableHead>
                                                 <TableHead>Labor Hours</TableHead>
                                                 <TableHead className="text-right">Actions</TableHead>
                                               </TableRow>
@@ -771,6 +787,7 @@ export default function ContractTypes() {
                                               {interval.partReplacements.map((part) => (
                                                 <TableRow key={part.id}>
                                                   <TableCell>{part.partName}</TableCell>
+                                                  <TableCell>{part.quantity}</TableCell>
                                                   <TableCell>{part.labor} hrs</TableCell>
                                                   <TableCell className="text-right">
                                                     <Button 
@@ -917,6 +934,20 @@ export default function ContractTypes() {
                 )}
               />
               
+              <FormField
+                control={contractForm.control}
+                name="partsAllowance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parts Allowance (quantity)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   Cancel
@@ -976,6 +1007,20 @@ export default function ContractTypes() {
                     <FormLabel>Price ($)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={contractForm.control}
+                name="partsAllowance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parts Allowance (quantity)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1196,6 +1241,25 @@ export default function ContractTypes() {
                     <FormLabel>Part Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Part Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={partForm.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min="1" 
+                        placeholder="Quantity" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

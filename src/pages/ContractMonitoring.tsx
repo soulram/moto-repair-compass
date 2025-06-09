@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,8 +36,8 @@ export default function ContractMonitoring() {
       contractType: "premium",
       servicesAllowed: 12,
       servicesUsed: 8,
-      partsAllowance: 2500,
-      partsUsed: 1800,
+      partsAllowance: 25,
+      partsUsed: 18,
       lastServiceDate: "2024-01-15",
       expiryDate: "2024-12-31"
     },
@@ -47,8 +48,8 @@ export default function ContractMonitoring() {
       contractType: "basic",
       servicesAllowed: 6,
       servicesUsed: 4,
-      partsAllowance: 1000,
-      partsUsed: 650,
+      partsAllowance: 10,
+      partsUsed: 6,
       lastServiceDate: "2024-02-20",
       expiryDate: "2024-11-30"
     },
@@ -59,8 +60,8 @@ export default function ContractMonitoring() {
       contractType: "inclusive",
       servicesAllowed: 24,
       servicesUsed: 15,
-      partsAllowance: 5000,
-      partsUsed: 3200,
+      partsAllowance: 50,
+      partsUsed: 32,
       lastServiceDate: "2024-01-28",
       expiryDate: "2025-06-15"
     }
@@ -203,8 +204,8 @@ export default function ContractMonitoring() {
                 <TableHead>Frame Number</TableHead>
                 <TableHead>Contract Type</TableHead>
                 <TableHead>Services Usage</TableHead>
-                <TableHead>Parts Allowance (€)</TableHead>
-                <TableHead>Parts Remaining (€)</TableHead>
+                <TableHead>Parts Allowance (qty)</TableHead>
+                <TableHead>Parts Remaining (qty)</TableHead>
                 <TableHead>Last Service</TableHead>
                 <TableHead>Expires</TableHead>
               </TableRow>
@@ -242,7 +243,7 @@ export default function ContractMonitoring() {
                     <TableCell>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>€{contract.partsUsed}/€{contract.partsAllowance}</span>
+                          <span>{contract.partsUsed}/{contract.partsAllowance}</span>
                           <span>{partsPercentage}%</span>
                         </div>
                         <Progress 
@@ -260,7 +261,7 @@ export default function ContractMonitoring() {
                           partsRemaining <= contract.partsAllowance * 0.1 ? 'text-red-600' :
                           partsRemaining <= contract.partsAllowance * 0.3 ? 'text-yellow-600' : 'text-green-600'
                         }`}>
-                          €{partsRemaining}
+                          {partsRemaining}
                         </div>
                         <div className="text-muted-foreground">remaining</div>
                       </div>
