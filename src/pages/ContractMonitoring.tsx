@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContractType } from "@/types";
-import { Search, TrendingDown, TrendingUp } from "lucide-react";
+import { Search, TrendingDown, TrendingUp, Package } from "lucide-react";
 
 interface ContractUsage {
   customerId: string;
@@ -96,6 +95,16 @@ export default function ContractMonitoring() {
     }
   };
 
+  const getTotalPartsRemaining = () => {
+    return contractUsages.reduce((total, contract) => {
+      return total + (contract.partsAllowance - contract.partsUsed);
+    }, 0);
+  };
+
+  const getHighPartsUsageCount = () => {
+    return contractUsages.filter(c => getUsagePercentage(c.partsUsed, c.partsAllowance) >= 70).length;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -105,7 +114,7 @@ export default function ContractMonitoring() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
@@ -127,6 +136,17 @@ export default function ContractMonitoring() {
               {contractUsages.filter(c => getUsagePercentage(c.servicesUsed, c.servicesAllowed) >= 70).length}
             </div>
             <p className="text-xs text-muted-foreground">Contracts with high usage</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Parts High Usage</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{getHighPartsUsageCount()}</div>
+            <p className="text-xs text-muted-foreground">High spare parts usage</p>
           </CardContent>
         </Card>
         
@@ -183,7 +203,8 @@ export default function ContractMonitoring() {
                 <TableHead>Frame Number</TableHead>
                 <TableHead>Contract Type</TableHead>
                 <TableHead>Services Usage</TableHead>
-                <TableHead>Parts Usage (€)</TableHead>
+                <TableHead>Parts Allowance (€)</TableHead>
+                <TableHead>Parts Remaining (€)</TableHead>
                 <TableHead>Last Service</TableHead>
                 <TableHead>Expires</TableHead>
               </TableRow>
@@ -192,6 +213,7 @@ export default function ContractMonitoring() {
               {filteredContracts.map((contract) => {
                 const servicesPercentage = getUsagePercentage(contract.servicesUsed, contract.servicesAllowed);
                 const partsPercentage = getUsagePercentage(contract.partsUsed, contract.partsAllowance);
+                const partsRemaining = contract.partsAllowance - contract.partsUsed;
                 
                 return (
                   <TableRow key={contract.customerId}>
@@ -230,6 +252,17 @@ export default function ContractMonitoring() {
                             getUsageStatus(partsPercentage) === 'warning' ? 'bg-yellow-100' : 'bg-green-100'
                           }`}
                         />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div className={`font-medium ${
+                          partsRemaining <= contract.partsAllowance * 0.1 ? 'text-red-600' :
+                          partsRemaining <= contract.partsAllowance * 0.3 ? 'text-yellow-600' : 'text-green-600'
+                        }`}>
+                          €{partsRemaining}
+                        </div>
+                        <div className="text-muted-foreground">remaining</div>
                       </div>
                     </TableCell>
                     <TableCell>{new Date(contract.lastServiceDate).toLocaleDateString()}</TableCell>
