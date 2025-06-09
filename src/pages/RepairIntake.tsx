@@ -18,6 +18,15 @@ import { toast } from "sonner";
 import { CheckSquare, Plus } from "lucide-react";
 
 export default function RepairIntake() {
+  // State variables for the repair intake process
+  const [activeTab, setActiveTab] = useState("customer");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedMotorcycle, setSelectedMotorcycle] = useState<Motorcycle | null>(null);
+  const [mileage, setMileage] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
+  const [frameNumber, setFrameNumber] = useState("");
+
   // Mock data - would come from an API in a real application
   const mockCustomers: Customer[] = [
     {
