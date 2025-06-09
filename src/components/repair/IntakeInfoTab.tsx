@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,7 @@ interface IntakeInfoTabProps {
   onBack: () => void;
   onNext: () => void;
   customerContractType?: ContractType;
+  hasContract: boolean;
 }
 
 // Mock frame numbers for partial search demonstration
@@ -92,6 +92,7 @@ export function IntakeInfoTab({
   onBack,
   onNext,
   customerContractType = "basic",
+  hasContract,
 }: IntakeInfoTabProps) {
   
   // Get matching frame numbers for partial search
@@ -189,6 +190,37 @@ export function IntakeInfoTab({
           />
         </div>
       </div>
+
+      {hasContract && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-700">
+              Contract Information
+              <Badge variant="secondary">{customerContractType} contract</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-blue-600">
+              This frame number has an active {customerContractType} contract. 
+              The checklist will be customized based on the contract type and current mileage ({mileage} km).
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!hasContract && mileage && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="text-orange-700">No Contract</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-orange-600">
+              This frame number does not have an active contract. 
+              A complete inspection checklist will be used where you can specify actions for each item.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {mileage && parseInt(mileage) > 0 && recommendedServices.length > 0 && (
         <Card>

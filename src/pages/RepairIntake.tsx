@@ -80,8 +80,36 @@ export default function RepairIntake() {
     }
   ];
 
-  // Checklist categories and items
-  const checklistCategories = [
+  // Contract-based checklist items for different mileages
+  const contractChecklists = {
+    5000: [
+      { id: "c1", name: "Engine oil level", category: "engine", type: "V" as const },
+      { id: "c2", name: "Engine oil condition", category: "engine", type: "V" as const },
+      { id: "c3", name: "Basic visual inspection", category: "general", type: "V" as const }
+    ],
+    10000: [
+      { id: "c1", name: "Engine oil level", category: "engine", type: "V" as const },
+      { id: "c2", name: "Engine oil condition", category: "engine", type: "V" as const },
+      { id: "c4", name: "Air filter replacement", category: "engine", type: "R" as const },
+      { id: "c5", name: "Brake inspection", category: "brakes", type: "V" as const }
+    ],
+    15000: [
+      { id: "c1", name: "Engine oil level", category: "engine", type: "V" as const },
+      { id: "c2", name: "Engine oil condition", category: "engine", type: "V" as const },
+      { id: "c6", name: "Brake fluid replacement", category: "brakes", type: "R" as const },
+      { id: "c7", name: "Chain adjustment", category: "transmission", type: "V" as const }
+    ],
+    20000: [
+      { id: "c1", name: "Engine oil level", category: "engine", type: "V" as const },
+      { id: "c2", name: "Engine oil condition", category: "engine", type: "V" as const },
+      { id: "c8", name: "Valve adjustment", category: "engine", type: "V" as const },
+      { id: "c9", name: "Coolant replacement", category: "engine", type: "R" as const },
+      { id: "c10", name: "Spark plugs", category: "engine", type: "R" as const }
+    ]
+  };
+
+  // Complete checklist for non-contract vehicles
+  const completeChecklistCategories = [
     {
       name: "Engine & Transmission",
       icon: <CheckSquare className="h-5 w-5 text-blue-500" />,
@@ -90,29 +118,33 @@ export default function RepairIntake() {
         { id: "e2", name: "Engine oil condition", category: "engine", type: "V" as const },
         { id: "e3", name: "Coolant level and condition", category: "engine", type: "V" as const },
         { id: "e4", name: "Transmission oil level", category: "engine", type: "V" as const },
-        { id: "e5", name: "Engine mounts", category: "engine", type: "V" as const }
+        { id: "e5", name: "Engine mounts", category: "engine", type: "V" as const },
+        { id: "e6", name: "Air filter condition", category: "engine", type: "V" as const },
+        { id: "e7", name: "Spark plugs condition", category: "engine", type: "V" as const }
       ]
     },
     {
       name: "Brakes & Suspension",
       icon: <CheckSquare className="h-5 w-5 text-red-500" />,
       items: [
-        { id: "b1", name: "Front brake pads", category: "brakes", type: "R" as const },
-        { id: "b2", name: "Rear brake pads", category: "brakes", type: "R" as const },
+        { id: "b1", name: "Front brake pads", category: "brakes", type: "V" as const },
+        { id: "b2", name: "Rear brake pads", category: "brakes", type: "V" as const },
         { id: "b3", name: "Brake fluid level", category: "brakes", type: "V" as const },
         { id: "b4", name: "Front fork condition", category: "suspension", type: "V" as const },
-        { id: "b5", name: "Rear shock condition", category: "suspension", type: "V" as const }
+        { id: "b5", name: "Rear shock condition", category: "suspension", type: "V" as const },
+        { id: "b6", name: "Brake lines inspection", category: "brakes", type: "V" as const }
       ]
     },
     {
       name: "Electrical & Lighting",
       icon: <CheckSquare className="h-5 w-5 text-yellow-500" />,
       items: [
-        { id: "l1", name: "Headlight operation", category: "electrical", type: "N" as const },
-        { id: "l2", name: "Tail light operation", category: "electrical", type: "N" as const },
-        { id: "l3", name: "Turn signals", category: "electrical", type: "N" as const },
+        { id: "l1", name: "Headlight operation", category: "electrical", type: "V" as const },
+        { id: "l2", name: "Tail light operation", category: "electrical", type: "V" as const },
+        { id: "l3", name: "Turn signals", category: "electrical", type: "V" as const },
         { id: "l4", name: "Battery condition", category: "electrical", type: "V" as const },
-        { id: "l5", name: "Charging system", category: "electrical", type: "V" as const }
+        { id: "l5", name: "Charging system", category: "electrical", type: "V" as const },
+        { id: "l6", name: "Wiring harness inspection", category: "electrical", type: "V" as const }
       ]
     },
     {
@@ -123,19 +155,12 @@ export default function RepairIntake() {
         { id: "t2", name: "Rear tire tread", category: "tires", type: "V" as const },
         { id: "t3", name: "Tire pressure", category: "tires", type: "V" as const },
         { id: "t4", name: "Wheel bearings", category: "wheels", type: "V" as const },
-        { id: "t5", name: "Wheel alignment", category: "wheels", type: "V" as const }
+        { id: "t5", name: "Wheel alignment", category: "wheels", type: "V" as const },
+        { id: "t6", name: "Rim condition", category: "wheels", type: "V" as const }
       ]
     }
   ];
 
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [selectedMotorcycle, setSelectedMotorcycle] = useState<Motorcycle | null>(null);
-  const [mileage, setMileage] = useState("");
-  const [customerNotes, setCustomerNotes] = useState("");
-  const [frameNumber, setFrameNumber] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("customer");
-  
   // State for checklist items
   const [checklistData, setChecklistData] = useState<ChecklistItem[]>([]);
   
@@ -144,6 +169,11 @@ export default function RepairIntake() {
   const [customerConfirmed, setCustomerConfirmed] = useState(false);
   const [customerComments, setCustomerComments] = useState("");
 
+  // Add state for contract status
+  const [hasContract, setHasContract] = useState(false);
+  const [currentChecklistCategories, setCurrentChecklistCategories] = useState(completeChecklistCategories);
+
+  // Filtered customers based on search query
   const filteredCustomers = mockCustomers.filter(
     (customer) =>
       customer.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -186,6 +216,11 @@ export default function RepairIntake() {
         setSelectedCustomer(customer);
         setSelectedMotorcycle(foundMotorcycle);
         setMileage(foundMotorcycle.currentMileage.toString());
+        
+        // Check if customer has a contract (not 'none')
+        const contractExists = customer.contractType !== 'none';
+        setHasContract(contractExists);
+        
         toast.success(`Found motorcycle: ${foundMotorcycle.make} ${foundMotorcycle.model}`);
         setActiveTab("intake");
       }
@@ -194,11 +229,25 @@ export default function RepairIntake() {
     }
   };
 
+  const getContractChecklistForMileage = (mileage: number) => {
+    // Find the appropriate checklist based on mileage
+    const mileageIntervals = [5000, 10000, 15000, 20000];
+    const applicableInterval = mileageIntervals
+      .filter(interval => mileage >= interval)
+      .sort((a, b) => b - a)[0]; // Get the highest applicable interval
+
+    return contractChecklists[applicableInterval] || contractChecklists[5000];
+  };
+
   const initializeChecklist = () => {
     const initialChecklist: ChecklistItem[] = [];
     
-    checklistCategories.forEach(category => {
-      category.items.forEach(item => {
+    if (hasContract && selectedCustomer?.contractType !== 'none') {
+      // Use contract-specific checklist based on mileage
+      const currentMileage = parseInt(mileage);
+      const contractItems = getContractChecklistForMileage(currentMileage);
+      
+      contractItems.forEach(item => {
         initialChecklist.push({
           id: item.id,
           name: item.name,
@@ -209,7 +258,37 @@ export default function RepairIntake() {
           requiresAttention: false
         });
       });
-    });
+
+      // Create simplified categories for contract checklist
+      const contractCategories = [
+        {
+          name: "Contract Maintenance Items",
+          icon: <CheckSquare className="h-5 w-5 text-blue-500" />,
+          items: contractItems
+        }
+      ];
+      setCurrentChecklistCategories(contractCategories);
+      
+      toast.success(`Contract checklist loaded for ${currentMileage} km service`);
+    } else {
+      // Use complete checklist for non-contract vehicles
+      completeChecklistCategories.forEach(category => {
+        category.items.forEach(item => {
+          initialChecklist.push({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            type: item.type,
+            status: "not-checked",
+            notes: "",
+            requiresAttention: false
+          });
+        });
+      });
+      
+      setCurrentChecklistCategories(completeChecklistCategories);
+      toast.success("Complete inspection checklist loaded");
+    }
     
     setChecklistData(initialChecklist);
     setActiveTab("checklist");
@@ -248,7 +327,7 @@ export default function RepairIntake() {
   };
 
   const getCategoryProgressPercentage = (categoryName: string) => {
-    const categoryItems = checklistCategories
+    const categoryItems = currentChecklistCategories
       .find(cat => cat.name === categoryName)?.items || [];
     
     if (categoryItems.length === 0) return 0;
@@ -367,6 +446,7 @@ export default function RepairIntake() {
                 setFrameNumber={setFrameNumber}
                 onFrameNumberSearch={handleFrameNumberSearch}
                 customerContractType={selectedCustomer?.contractType}
+                hasContract={hasContract}
                 onBack={() => setActiveTab("motorcycle")}
                 onNext={initializeChecklist}
               />
@@ -374,7 +454,7 @@ export default function RepairIntake() {
             
             <TabsContent value="checklist">
               <ChecklistTab 
-                checklistCategories={checklistCategories}
+                checklistCategories={currentChecklistCategories}
                 checklistData={checklistData}
                 onStatusChange={handleChecklistItemChange}
                 onBack={() => setActiveTab("intake")}
